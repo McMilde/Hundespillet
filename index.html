@@ -1,0 +1,3298 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Osilles Hundespill 🐾</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%B6%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --pink:#FF6FA5;
+    --pink-light:#FF9EC7;
+    --purple:#C9A0FF;
+    --text:#5C3A52;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    min-height:100vh;
+    font-family:'Comic Sans MS','Trebuchet MS','Segoe UI',sans-serif;
+    background:linear-gradient(-45deg,#FFE4EC,#FDE2FF,#E9D9FF,#FFF0F5);
+    background-size:400% 400%;
+    animation:gradientShift 18s ease infinite;
+    overflow-x:hidden;
+    color:var(--text);
+  }
+  @keyframes gradientShift{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+
+  #sparkle-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0;}
+  .sparkle{position:absolute;color:#fff;opacity:0.5;animation-name:twinkle;animation-iteration-count:infinite;text-shadow:0 0 6px #fff,0 0 10px #FFB6D1;}
+  @keyframes twinkle{0%,100%{opacity:0.15;transform:scale(0.8);}50%{opacity:1;transform:scale(1.25);}}
+
+  #confetti-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:9999;}
+  .confetti-piece{position:fixed;top:0;left:0;opacity:1;animation-name:confettiFly;animation-timing-function:ease-out;animation-fill-mode:forwards;}
+  @keyframes confettiFly{to{transform:translate(var(--dx),calc(var(--dy) + 320px)) rotate(var(--rot));opacity:0;}}
+
+  .mini-topbar{display:flex;align-items:center;width:100%;max-width:480px;padding:6px 6px 0;position:relative;z-index:1;}
+  .icon-btn-sm{border:none;border-radius:50%;width:38px;height:38px;font-size:1.05rem;background:#fff;box-shadow:0 3px 0 rgba(0,0,0,0.1);cursor:pointer;flex-shrink:0;}
+  .icon-btn-sm.settings-toggle{opacity:0.55;}
+  .icon-btn-sm:active{transform:translateY(2px);box-shadow:none;}
+
+  .screen{display:none;min-height:100vh;flex-direction:column;align-items:center;justify-content:center;padding:20px;position:relative;z-index:1;}
+  .screen.active{display:flex;}
+
+  .card{background:rgba(255,255,255,0.85);backdrop-filter:blur(4px);border-radius:32px;padding:32px 28px;box-shadow:0 12px 40px rgba(255,111,165,0.25);max-width:480px;width:100%;text-align:center;}
+
+  h1{font-size:1.9rem;color:var(--pink);text-shadow:2px 2px 0 #fff;margin:0 0 6px;}
+  .subtitle{color:#8A5FBF;font-weight:700;margin:0 0 16px;}
+
+  .dog-preview{margin:8px auto 10px;width:150px;height:150px;animation:floatY 3s ease-in-out infinite;}
+  .dog-preview svg{width:100%;height:100%;}
+  @keyframes floatY{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+
+  .character-row{margin:2px 0 14px;min-height:18px;}
+  .character-row span{display:block;font-size:0.8rem;color:#8A5FBF;font-weight:700;}
+  .character-row button{background:none;border:none;color:var(--pink);font-weight:700;font-size:0.8rem;text-decoration:underline;cursor:pointer;font-family:inherit;margin-top:2px;}
+  .math-level-line{display:block;width:100%;background:none;border:none;color:#8A5FBF;font-weight:700;font-size:0.8rem;text-decoration:underline;cursor:pointer;font-family:inherit;margin:2px 0 8px;text-align:center;}
+  .stats-link-btn{display:block;width:100%;background:none;border:none;color:#8A5FBF;font-weight:700;font-size:0.68rem;text-decoration:underline;cursor:pointer;font-family:inherit;margin:2px 0 0;text-align:center;}
+
+  .companion-avatar{width:52px;height:52px;margin:0 auto 4px;animation:floatY 3s ease-in-out infinite;}
+  .companion-avatar svg{width:100%;height:100%;}
+
+  .big-btn{display:block;width:100%;background:linear-gradient(135deg,var(--pink-light),var(--pink));color:#fff;border:none;border-radius:24px;padding:16px 24px;font-size:1.25rem;font-weight:700;box-shadow:0 6px 0 #D9457E,0 8px 20px rgba(0,0,0,0.12);cursor:pointer;margin:8px 0;font-family:inherit;transition:transform .1s;}
+  .big-btn:active{transform:translateY(4px);box-shadow:0 2px 0 #D9457E;}
+  .big-btn.english-btn{background:linear-gradient(135deg,#7EC8FF,#5CA8FF);box-shadow:0 6px 0 #2F7FD9,0 8px 20px rgba(0,0,0,0.12);}
+  .big-btn.english-btn:active{box-shadow:0 2px 0 #2F7FD9;}
+
+  .secondary-btn{display:block;width:100%;background:linear-gradient(135deg,#E3D2FF,var(--purple));color:#fff;border:none;border-radius:24px;padding:14px 24px;font-size:1.05rem;font-weight:700;box-shadow:0 5px 0 #9A6FD9,0 6px 16px rgba(0,0,0,0.1);cursor:pointer;margin:8px 0;font-family:inherit;transition:transform .1s;}
+  .secondary-btn:active{transform:translateY(4px);box-shadow:0 1px 0 #9A6FD9;}
+
+  .modal-secondary-btn{display:block;width:100%;background:none;border:2px solid var(--purple);border-radius:20px;padding:10px 16px;color:#8A5FBF;font-weight:700;cursor:pointer;font-family:inherit;margin-top:10px;}
+  .modal-secondary-btn.is-selected{border-color:#FFD700;color:#C79A00;background:#FFF8E0;}
+
+  .topbar{display:flex;justify-content:space-between;align-items:center;gap:6px;width:100%;max-width:620px;padding:10px 6px;}
+  .topbar h2{margin:0;color:var(--pink);font-size:1.3rem;}
+  .icon-btn{background:#fff;border:none;border-radius:50%;width:44px;height:44px;font-size:1.2rem;box-shadow:0 4px 0 rgba(0,0,0,0.1);cursor:pointer;flex-shrink:0;}
+  .icon-btn:active{transform:translateY(3px);box-shadow:none;}
+  .topbar-group{display:flex;align-items:center;gap:6px;}
+
+  .progress-wrap{flex:1;min-width:0;margin:0 4px;}
+  .album-progress{max-width:620px;width:100%;margin:2px 0 14px;padding:0 10px;}
+  .progress-bar{width:100%;height:18px;background:rgba(255,255,255,0.6);border-radius:10px;overflow:hidden;box-shadow:inset 0 2px 4px rgba(0,0,0,0.12);}
+  .progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--pink-light),#FFD54F);border-radius:10px;transition:width .5s ease;}
+  #progress-text,#progress-text-album,#progress-text-english{display:block;text-align:center;font-size:0.85rem;font-weight:700;color:#8A5FBF;margin-top:4px;}
+
+  .problem-card{position:relative;}
+  .feedback-msg{min-height:26px;font-weight:800;margin:2px 0 8px;}
+  .feedback-msg.positive{color:#2E9E6B;}
+  .feedback-msg.retry{color:#E85D75;}
+  .problem{font-size:2.1rem;font-weight:800;color:var(--text);margin:6px 0 14px;letter-spacing:0.5px;}
+  .answer-display{font-size:2.6rem;font-weight:800;background:#fff;border-radius:16px;padding:6px;min-height:58px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;color:var(--pink);box-shadow:inset 0 2px 6px rgba(0,0,0,0.1);}
+
+  .text-input-row{margin:0 0 14px;}
+  .text-input{width:100%;font-size:1.6rem;font-weight:700;text-align:center;background:#fff;border:none;border-radius:16px;padding:14px;color:var(--pink);box-shadow:inset 0 2px 6px rgba(0,0,0,0.1);font-family:inherit;}
+  .text-input:focus{outline:3px solid var(--purple);}
+
+  .numpad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:0 0 6px;}
+  .num-btn{aspect-ratio:1;border-radius:18px;font-size:1.5rem;font-weight:700;border:none;background:#fff;box-shadow:0 4px 0 #E8B4D0;cursor:pointer;font-family:inherit;color:var(--text);}
+  .num-btn:active{transform:translateY(3px);box-shadow:none;}
+  .num-btn.confirm{background:linear-gradient(135deg,#7EE8C7,#4FD1A5);color:#fff;box-shadow:0 4px 0 #34A57D;}
+  .num-btn.del{background:linear-gradient(135deg,#FFB199,#FF7A5C);color:#fff;box-shadow:0 4px 0 #D9502F;}
+
+  .hint-btn{margin-top:6px;background:none;border:2px dashed var(--purple);border-radius:20px;padding:8px 16px;color:#8A5FBF;font-weight:700;cursor:pointer;font-family:inherit;}
+  .hidden{display:none!important;}
+
+  @keyframes shake{10%,90%{transform:translateX(-4px);}20%,80%{transform:translateX(6px);}30%,50%,70%{transform:translateX(-10px);}40%,60%{transform:translateX(10px);}}
+  .shake{animation:shake .5s;}
+
+  .tabs{display:flex;gap:8px;max-width:620px;width:100%;padding:0 10px;margin-bottom:6px;}
+  .tab-btn{flex:1;border:none;border-radius:16px 16px 0 0;padding:10px 8px;font-weight:700;font-size:0.9rem;background:rgba(255,255,255,0.45);color:#8A5FBF;cursor:pointer;font-family:inherit;}
+  .tab-btn.active{background:rgba(255,255,255,0.92);color:var(--pink);}
+
+  .locked-panel{max-width:420px;text-align:center;padding:50px 20px;color:#8A5FBF;font-weight:700;}
+  .locked-panel .lock-icon{font-size:2.5rem;display:block;margin-bottom:10px;}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(78px,1fr));gap:10px;max-width:900px;width:100%;padding:6px 10px 40px;}
+  .dog-slot{position:relative;display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,0.6);border-radius:16px;padding:6px 4px;}
+  .dog-slot.collected{cursor:pointer;background:rgba(255,255,255,0.92);transition:transform .15s;}
+  .dog-slot.collected:hover{transform:scale(1.06);}
+  .dog-slot svg{width:52px;height:52px;}
+  .dog-slot .locked-icon{font-size:26px;opacity:0.3;height:52px;display:flex;align-items:center;justify-content:center;}
+  .dog-slot-name{font-size:0.62rem;margin-top:3px;color:#7A4A63;font-weight:700;text-align:center;line-height:1.1;}
+  .dog-slot.sjelden{box-shadow:0 0 0 2px #B0B0C8 inset;}
+  .dog-slot.super{box-shadow:0 0 0 2px #FFD700 inset;}
+  .dog-slot.legendarisk{animation:legendaryPulse 2s infinite;}
+  .dog-slot.collected.is-character{box-shadow:0 0 0 3px #FFD700 inset,0 0 10px 2px rgba(255,215,0,0.6);}
+  @keyframes legendaryPulse{0%,100%{box-shadow:0 0 0 3px #FFD700 inset,0 0 10px 2px rgba(255,215,0,0.5);}50%{box-shadow:0 0 0 3px #FF6FA5 inset,0 0 16px 4px rgba(255,111,165,0.7);}}
+  .char-badge{position:absolute;top:2px;right:2px;background:#FFD54F;color:#7A4A22;font-size:0.75rem;border-radius:50%;width:20px;height:20px;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 4px rgba(0,0,0,0.2);}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(70,30,60,0.45);display:flex;align-items:center;justify-content:center;z-index:2000;padding:16px;}
+  .modal-card{background:#fff;border-radius:28px;padding:26px 24px;max-width:360px;width:100%;text-align:center;box-shadow:0 20px 50px rgba(0,0,0,0.3);animation:popIn .35s ease;}
+  @keyframes popIn{0%{transform:scale(0.7);opacity:0;}100%{transform:scale(1);opacity:1;}}
+  .new-banner{color:var(--pink);font-weight:800;font-size:1.1rem;margin-bottom:6px;animation:bounceBanner .8s ease infinite;}
+  @keyframes bounceBanner{0%,100%{transform:translateY(0);}50%{transform:translateY(-6px);}}
+  .modal-dog-svg{width:150px;height:150px;margin:0 auto 8px;}
+  .modal-dog-svg svg{width:100%;height:100%;}
+  .modal-card h2{margin:4px 0 2px;color:var(--text);}
+  .modal-number{color:#8A5FBF;font-weight:700;margin:0 0 4px;}
+  .modal-rarity{font-weight:800;margin:0 0 16px;}
+  .rarity-vanlig{color:#D9709A;}
+  .rarity-sjelden{color:#8888B0;}
+  .rarity-super{color:#C79A00;}
+  .rarity-legendarisk{color:#FF3D8A;text-shadow:0 0 8px rgba(255,111,165,0.6);}
+
+  .settings-modal-card p{font-weight:600;}
+  .settings-modal-card .big-btn{background:linear-gradient(135deg,#FF9E85,#FF6F5C);box-shadow:0 6px 0 #C94A2F,0 8px 20px rgba(0,0,0,0.12);}
+
+  .big-btn.park-btn{background:linear-gradient(135deg,#7EE8C7,#4FD1A5);box-shadow:0 6px 0 #2E9E6B,0 8px 20px rgba(0,0,0,0.12);}
+  .big-btn.park-btn:active{box-shadow:0 2px 0 #2E9E6B;}
+  .world-topbar-text{font-weight:700;color:#8A5FBF;font-size:0.85rem;text-align:center;flex:1;}
+  .world-wrap{max-width:960px;width:100%;position:relative;margin-top:6px;}
+  #world-canvas,#race-canvas{display:block;width:100%;max-width:960px;height:auto;aspect-ratio:960/540;border-radius:20px;box-shadow:0 12px 40px rgba(255,111,165,0.25);background:#cfe8ff;touch-action:none;}
+  .world-controls-hint{position:absolute;left:14px;bottom:14px;background:rgba(255,255,255,0.8);border-radius:12px;padding:6px 12px;font-size:0.78rem;font-weight:700;color:#7A4A63;pointer-events:none;}
+  .world-course-heading{max-width:960px;width:100%;text-align:center;font-weight:800;color:var(--pink);margin:2px 0 4px;padding:0 10px;}
+
+  .course-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:linear-gradient(135deg,#7EE8C7,#4FD1A5);color:#fff;border:none;border-radius:20px;padding:14px 18px;font-size:1rem;font-weight:700;box-shadow:0 5px 0 #2E9E6B,0 6px 16px rgba(0,0,0,0.1);cursor:pointer;margin:8px 0;font-family:inherit;text-align:left;gap:10px;}
+  .course-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #2E9E6B;}
+  .course-btn.locked{background:linear-gradient(135deg,#d3d3dc,#b7b7c2);box-shadow:0 5px 0 #90909c;cursor:not-allowed;opacity:0.85;}
+  .course-btn .course-name{display:block;font-size:1rem;}
+  .course-btn .course-sub{display:block;font-size:0.72rem;font-weight:600;opacity:0.9;margin-top:2px;}
+  .course-btn .course-badge{font-size:1.3rem;flex-shrink:0;}
+  .world-heading{font-weight:800;color:var(--pink);text-align:left;margin:16px 0 2px;font-size:0.95rem;}
+  .world-heading:first-child{margin-top:0;}
+
+  .coin-balance{display:block;font-size:0.8rem;color:#C79A00;font-weight:700;margin-top:4px;}
+  .big-btn.shop-btn-launch{background:linear-gradient(135deg,#FFD54F,#FFB300);box-shadow:0 6px 0 #B8860B,0 8px 20px rgba(0,0,0,0.12);}
+  .big-btn.shop-btn-launch:active{box-shadow:0 2px 0 #B8860B;}
+  .big-btn.race-btn{background:linear-gradient(135deg,#FF8A65,#FF5252);box-shadow:0 6px 0 #C62828,0 8px 20px rgba(0,0,0,0.12);}
+  .big-btn.race-btn:active{box-shadow:0 2px 0 #C62828;}
+  .big-btn.candy-btn{background:linear-gradient(135deg,#FF6FA5,#C9A0FF);box-shadow:0 6px 0 #9A5FBF,0 8px 20px rgba(0,0,0,0.12);}
+  .big-btn.candy-btn:active{box-shadow:0 2px 0 #9A5FBF;}
+
+  .big-btn.forbidden-btn{background:repeating-linear-gradient(135deg,#FF3D3D,#FF3D3D 10px,#FFD700 10px,#FFD700 20px);color:#fff;text-shadow:1px 1px 2px rgba(0,0,0,0.4);box-shadow:0 6px 0 #B00000,0 8px 20px rgba(0,0,0,0.2);animation:forbiddenWiggle 2.2s ease-in-out infinite;font-size:1.05rem;margin-bottom:14px;}
+  .big-btn.forbidden-btn:active{box-shadow:0 2px 0 #B00000;}
+  @keyframes forbiddenWiggle{0%,88%,100%{transform:rotate(0deg);}90%{transform:rotate(-3deg);}92%{transform:rotate(3deg);}94%{transform:rotate(-2deg);}96%{transform:rotate(2deg);}98%{transform:rotate(0deg);}}
+
+  .firework-particle{position:fixed;top:0;left:0;width:5px;height:5px;border-radius:50%;pointer-events:none;animation-name:fireworkFly;animation-timing-function:ease-out;animation-fill-mode:forwards;z-index:9999;}
+  @keyframes fireworkFly{0%{transform:translate(0,0) scale(1);opacity:1;}100%{transform:translate(var(--fx),var(--fy)) scale(0.3);opacity:0;}}
+  .firework-flash{position:fixed;top:0;left:0;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:radial-gradient(circle,#fff,transparent);pointer-events:none;animation:fireworkFlash 0.4s ease-out forwards;z-index:9999;}
+  @keyframes fireworkFlash{0%{transform:scale(0.5);opacity:1;}100%{transform:scale(4);opacity:0;}}
+
+  .glitter-particle{position:fixed;color:#FF6FA5;text-shadow:0 0 8px #FF9EC7,0 0 14px #fff;pointer-events:none;animation-name:glitterFall;animation-timing-function:ease-in;animation-fill-mode:forwards;z-index:9999;}
+  @keyframes glitterFall{0%{transform:translate(0,0) rotate(0deg);opacity:0;}10%{opacity:1;}100%{transform:translate(var(--gx),120vh) rotate(360deg);opacity:0;}}
+
+  .candy-status-row{max-width:480px;width:100%;display:flex;justify-content:space-between;align-items:center;padding:0 10px;font-weight:800;color:#8A5FBF;margin:4px 0 10px;font-size:1rem;}
+  .candy-shelf-wrap{max-width:480px;width:100%;background:linear-gradient(180deg,#F5E6C8,#E8D4A0);border-radius:20px;padding:14px;box-shadow:0 12px 40px rgba(255,111,165,0.25);}
+  .candy-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;}
+  .candy-cell{aspect-ratio:1;border:none;border-radius:12px;background:#fff;font-size:1.5rem;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,0.15);font-family:inherit;}
+  .candy-cell:active{transform:translateY(2px);box-shadow:none;}
+  .candy-cell.candy-found{background:linear-gradient(135deg,#7EE8C7,#4FD1A5);opacity:0.45;cursor:default;}
+  .candy-cell.candy-miss{animation:shake 0.4s;background:#FFD9D9;}
+  @keyframes urgentPulse{0%,100%{transform:scale(1);}50%{transform:scale(1.18);}}
+  #candy-timer-text.candy-timer-urgent{color:#FF3D3D;display:inline-block;animation:urgentPulse 0.6s infinite;}
+
+  .shop-card{max-width:520px;}
+  .shop-coin-text{font-weight:800;color:#C79A00;font-size:1.1rem;margin:0 0 14px;}
+  .shop-item{display:flex;align-items:center;gap:10px;background:rgba(255,255,255,0.7);border-radius:16px;padding:10px 12px;margin-bottom:10px;}
+  .shop-item-icon{font-size:1.8rem;flex-shrink:0;}
+  .car-swatch{font-size:1.4rem;flex-shrink:0;width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:inset 0 0 0 2px rgba(255,255,255,0.6);}
+  .shop-item-info{flex:1;text-align:left;}
+  .shop-item-name{display:block;font-weight:700;color:var(--text);}
+  .shop-item-price{display:block;font-size:0.8rem;color:#8A5FBF;font-weight:600;}
+  .shop-buy-btn{border:none;border-radius:16px;padding:10px 16px;font-weight:700;font-family:inherit;background:linear-gradient(135deg,#7EE8C7,#4FD1A5);color:#fff;box-shadow:0 4px 0 #2E9E6B;cursor:pointer;flex-shrink:0;}
+  .shop-buy-btn:active{transform:translateY(3px);box-shadow:none;}
+  .shop-buy-btn:disabled{background:#d3d3dc;box-shadow:0 4px 0 #a0a0aa;cursor:not-allowed;opacity:0.7;}
+  .shop-buy-btn.equipped{background:linear-gradient(135deg,#FFD54F,#FFB300);box-shadow:0 4px 0 #B8860B;}
+
+  .card-gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(74px,1fr));gap:10px;margin-top:16px;}
+  .card-item{display:flex;flex-direction:column;align-items:center;background:rgba(255,255,255,0.7);border-radius:14px;padding:6px 4px;position:relative;box-shadow:0 0 0 2px var(--card-color) inset;}
+  .card-item svg{width:48px;height:48px;}
+  .card-item-name{font-size:0.6rem;font-weight:700;color:#7A4A63;margin-top:2px;text-align:center;}
+  .card-item-count{position:absolute;top:2px;right:4px;font-size:0.65rem;font-weight:800;color:#8A5FBF;background:#fff;border-radius:8px;padding:0 4px;}
+</style>
+</head>
+<body>
+
+<div id="sparkle-layer"></div>
+<div id="confetti-layer"></div>
+
+<div id="screen-start" class="screen active">
+  <div class="mini-topbar">
+    <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    <div style="flex:1"></div>
+    <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+  </div>
+  <div class="card">
+    <h1>🐾 Osilles Hundespill 🐾</h1>
+    <p class="subtitle">Regn riktig og samle 100 søte hunder!</p>
+    <button class="big-btn forbidden-btn" id="forbidden-btn">🚫 OSILLE IKKE TRYKK HER 🚫</button>
+    <div class="dog-preview" id="start-dog-preview"></div>
+    <div class="character-row">
+      <span id="character-label"></span>
+      <button id="change-character-btn" class="hidden">Bytt karakter 🔄</button>
+      <span class="coin-balance" id="coin-balance"></span>
+    </div>
+    <button class="math-level-line hidden" id="math-level-line"></button>
+    <button class="big-btn" id="start-btn">Start å regne! ✨</button>
+    <button class="big-btn english-btn hidden" id="start-english-btn">Engelsk-utfordringen! 🐱✨</button>
+    <button class="big-btn park-btn hidden" id="park-btn">Gå til Hundeparken! 🌳🐾</button>
+    <button class="big-btn shop-btn-launch hidden" id="open-shop-btn">Butikken 🎁</button>
+    <button class="big-btn race-btn hidden" id="race-btn">Racerbanen! 🏁</button>
+    <button class="big-btn candy-btn hidden" id="candy-btn">Godteriland! 🍬</button>
+    <button class="secondary-btn" id="album-btn-start">Se hundealbumet mitt 📖</button>
+  </div>
+</div>
+
+<div id="screen-game" class="screen">
+  <div class="topbar">
+    <div class="topbar-group">
+      <button class="icon-btn" id="home-btn-game" title="Hjem">🏠</button>
+      <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+      <span id="progress-text">0 / 100 hunder</span>
+      <button class="stats-link-btn" id="stats-btn">📊 Statistikk</button>
+    </div>
+    <div class="topbar-group">
+      <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+      <button class="icon-btn" id="album-btn-game" title="Album">📖</button>
+    </div>
+  </div>
+  <div class="card problem-card">
+    <div class="companion-avatar hidden" id="companion-avatar-game"></div>
+    <div id="feedback-msg" class="feedback-msg"></div>
+    <div class="problem" id="problem-display">?? + ?? = ?</div>
+    <div class="answer-display" id="answer-display">_</div>
+    <div class="numpad" id="numpad"></div>
+    <button class="hint-btn hidden" id="hint-btn">Vis meg svaret 🙈</button>
+  </div>
+</div>
+
+<div id="screen-english" class="screen">
+  <div class="topbar">
+    <div class="topbar-group">
+      <button class="icon-btn" id="home-btn-english" title="Hjem">🏠</button>
+      <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill-english"></div></div>
+      <span id="progress-text-english">0 / 80 dyr</span>
+    </div>
+    <div class="topbar-group">
+      <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+      <button class="icon-btn" id="album-btn-english" title="Album">📖</button>
+    </div>
+  </div>
+  <div class="card problem-card" id="english-card">
+    <div class="companion-avatar hidden" id="companion-avatar-english"></div>
+    <div id="feedback-msg-english" class="feedback-msg"></div>
+    <div class="problem" id="english-problem-display">Hva er ... på engelsk?</div>
+    <div class="text-input-row">
+      <input type="text" id="english-input" class="text-input" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="skriv svaret her...">
+    </div>
+    <button class="big-btn english-btn" id="english-check-btn">Sjekk svar ✅</button>
+    <button class="hint-btn hidden" id="hint-btn-english">Vis meg svaret 🙈</button>
+  </div>
+</div>
+
+<div id="screen-park-select" class="screen">
+  <div class="topbar">
+    <div class="topbar-group">
+      <button class="icon-btn" id="home-btn-park-select" title="Hjem">🏠</button>
+      <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    </div>
+    <h2>Hundeparken 🌳</h2>
+    <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+  </div>
+  <div class="card">
+    <p class="subtitle">Velg en bane!</p>
+    <div id="course-list"></div>
+  </div>
+</div>
+
+<div id="screen-world" class="screen">
+  <div class="topbar">
+    <div class="topbar-group">
+      <button class="icon-btn" id="home-btn-world" title="Tilbake til baner">🌳</button>
+      <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    </div>
+    <span class="world-topbar-text" id="world-treat-text">🦴 0 / 15 godbiter</span>
+    <div class="topbar-group">
+      <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+      <button class="icon-btn-sm" id="world-reset-btn" title="Start banen på nytt">🔄</button>
+    </div>
+  </div>
+  <div class="world-course-heading" id="world-course-heading">Bane 1</div>
+  <div class="world-wrap">
+    <canvas id="world-canvas" width="960" height="540"></canvas>
+    <div class="world-controls-hint">⬅️➡️ Beveg deg · SPACE/⬆️ Hopp</div>
+  </div>
+</div>
+
+<div id="screen-shop" class="screen">
+  <div class="topbar">
+    <div class="topbar-group">
+      <button class="icon-btn" id="home-btn-shop" title="Hjem">🏠</button>
+      <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    </div>
+    <h2>Butikken 🎁</h2>
+    <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" id="shop-tab-hats">🎩 Hatter</button>
+    <button class="tab-btn" id="shop-tab-cards">🃏 Kort</button>
+    <button class="tab-btn" id="shop-tab-vehicles">🏎️ Biler</button>
+    <button class="tab-btn" id="shop-tab-clothes">👕 Klær</button>
+  </div>
+  <div class="card shop-card">
+    <p class="shop-coin-text" id="shop-coin-text">🦴 0 godbiter</p>
+    <div id="shop-list"></div>
+  </div>
+</div>
+
+<div id="screen-race" class="screen">
+  <div class="topbar">
+    <div class="topbar-group">
+      <button class="icon-btn" id="home-btn-race" title="Hjem">🏠</button>
+      <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    </div>
+    <span class="world-topbar-text" id="race-status-text">Klar, ferdig, gå!</span>
+    <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+  </div>
+  <div class="world-wrap">
+    <canvas id="race-canvas" width="960" height="540"></canvas>
+    <div class="world-controls-hint">Trykk ➡️ gjentatte ganger for fart · SPACE Turbo</div>
+  </div>
+</div>
+
+<div id="screen-candy" class="screen">
+  <div class="topbar">
+    <div class="topbar-group">
+      <button class="icon-btn" id="home-btn-candy" title="Hjem">🏠</button>
+      <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    </div>
+    <span class="world-topbar-text" id="candy-timer-text">⏱️ 60s</span>
+    <div class="topbar-group">
+      <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+      <button class="icon-btn-sm" id="candy-reset-btn" title="Nytt brett">🔄</button>
+    </div>
+  </div>
+  <div class="candy-status-row">
+    <span id="candy-basket-text">🧺 0 / 5 godteri</span>
+    <span id="candy-lives-text">❤️❤️❤️</span>
+  </div>
+  <div class="candy-shelf-wrap">
+    <div class="candy-grid" id="candy-grid"></div>
+  </div>
+</div>
+
+<div id="screen-album" class="screen">
+  <div class="topbar">
+    <div class="topbar-group">
+      <button class="icon-btn" id="home-btn-album" title="Hjem">🏠</button>
+      <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    </div>
+    <h2 id="album-title">Hundealbumet</h2>
+    <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+  </div>
+  <div class="tabs">
+    <button class="tab-btn active" id="tab-dogs">🐶 Hunder</button>
+    <button class="tab-btn" id="tab-animals">🐱 Dyr</button>
+  </div>
+  <div class="album-progress">
+    <div class="progress-bar"><div class="progress-fill" id="progress-fill-album"></div></div>
+    <span id="progress-text-album">0 / 100 hunder</span>
+  </div>
+  <div class="grid" id="dog-grid"></div>
+  <div class="grid hidden" id="animal-grid"></div>
+  <div class="locked-panel hidden" id="animal-locked-panel">
+    <span class="lock-icon">🔒</span>
+    Samle alle 100 hunder for å låse opp dyresamlingen!
+  </div>
+</div>
+
+<div id="screen-complete" class="screen">
+  <div class="mini-topbar">
+    <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    <div style="flex:1"></div>
+    <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+  </div>
+  <div class="card">
+    <h1>🏆 Gratulerer, Osille! 🏆</h1>
+    <p class="subtitle">Du har samlet ALLE 100 hundene! Du er en ekte matteMester!</p>
+    <button class="big-btn english-btn" id="complete-start-english-btn">Spill engelsk-utfordringen! 🐱✨</button>
+    <button class="secondary-btn" id="complete-album-btn">Se hele albumet 📖</button>
+    <button class="secondary-btn" id="complete-keep-btn">Fortsett å øve på tall 🧮</button>
+  </div>
+</div>
+
+<div id="screen-english-complete" class="screen">
+  <div class="mini-topbar">
+    <button class="icon-btn-sm mute-toggle" title="Lyd av/på">🔊</button>
+    <div style="flex:1"></div>
+    <button class="icon-btn-sm settings-toggle" title="Innstillinger">⚙️</button>
+  </div>
+  <div class="card">
+    <h1>🌟 Fantastisk, Osille! 🌟</h1>
+    <p class="subtitle">Du har samlet ALLE 80 dyrene og kan alle ordene! Du er en ekte engelsk-ekspert!</p>
+    <button class="big-btn" id="english-complete-album-btn">Se hele albumet 📖</button>
+    <button class="secondary-btn" id="english-complete-home-btn">Tilbake til start 🏠</button>
+  </div>
+</div>
+
+<div id="dog-modal" class="modal-overlay hidden">
+  <div class="modal-card" id="dog-modal-card"></div>
+</div>
+
+<div id="settings-modal" class="modal-overlay hidden">
+  <div class="modal-card settings-modal-card">
+    <h2>Innstillinger</h2>
+    <p>Dette er for en voksen 🙂</p>
+    <button class="big-btn" id="reset-btn">Nullstill alt</button>
+    <button class="secondary-btn" id="close-settings-btn">Lukk</button>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'osille_hundespill_v1';
+
+const DOG_NAMES = ['Bamse','Rex','Loffe','Fido','Pluto','Bruno','Bella','Molly','Daisy','Lucy',
+'Sadie','Maggie','Sophie','Chloe','Bailey','Zoe','Lily','Rosie','Coco','Ruby',
+'Ellie','Stella','Penny','Nala','Gracie','Willow','Mia','Roxy','Winnie','Honey',
+'Max','Buddy','Charlie','Cooper','Rocky','Teddy','Milo','Oscar','Leo','Jack',
+'Toby','Duke','Bear','Zeus','Loki','Thor','Finn','Sam','Buster','Chester',
+'Winston','Baxter','Simba','Diesel','Ranger','Scout','Copper','Gunner','Moose','Tank',
+'Otis','Louie','Murphy','Oliver','Rusty','Shadow','Jasper','Bandit','Gus','Hank',
+'Peanut','Pepper','Ginger','Cookie','Biscuit','Waffles','Muffin','Nugget','Pixel','Sprinkle',
+'Marshmallow','Cupcake','Jellybean','Konfetti','Glimmer','Diamant','Perle','Stjerne','Måne','Sol',
+'Regnbue','Krystall','Gnist','Trylle','Magi','Eventyr','Stjerneskudd','Kongelig','Skinnende','Kong Glitter'];
+
+const FUR_COLORS = ['#C68642','#8B5A2B','#4A3728','#FFFFFF','#D7CCC8','#F4A460','#FFB6C1','#B39DDB','#FFD54F','#90A4AE','#A1887F','#F8BBD0'];
+const ACCESSORY_COLORS = ['#FF6FA5','#FF9EC7','#C9A0FF','#7EC8FF','#7EE8C7','#FFD54F','#FF8A65'];
+const MEDAL_BG_PALETTE = ['#FFEFF5','#F3E8FF','#E8F7FF','#FFF7E0','#E9FFF2','#FFE9EC'];
+const RARITY_BORDER = {vanlig:'#FFB6D1', sjelden:'#B0B0C8', super:'#FFD700', legendarisk:'#FF3D8A'};
+const RARITY_LABELS = {vanlig:'Vanlig 🐾', sjelden:'Sjelden 🌟', super:'Super sjelden 💎', legendarisk:'LEGENDARISK! 👑✨'};
+
+const ANIMAL_NAMES = ['Silke','Nøtt','Kanel','Karamell','Iskrem','Snøfnugg','Vanilje','Rosin','Fersken','Bringebær',
+'Blåbær','Aprikos','Solsikke','Krokus','Tusenfryd','Fiol','Nellik','Kløver','Dugg','Skodde',
+'Frost','Aurora','Nordlys','Kongestjerne','Honningkake','Sukkerbit','Lillepus','Trynefjes','Ostebit','Diamantøye',
+'Peppermynte','Lakris','Marsipan','Sjokolade','Vaffel','Boble','Konfekt','Fjærlett','Soltopp','Måneskinn',
+'Stjerneskinn','Regnsky','Vårvind','Sommerbris','Høstblad','Vintersol','Bjørnebær','Tyttebær','Multe','Krekling',
+'Lyng','Mose','Bjørk','Rogn','Selje','Lavendel','Kamille','Ringblomst','Kornblomst','Valmue',
+'Prestekrage','Løvetann','Marigull','Rose','Iris','Tulipan','Anemone','Vindfang','Duggdråpe','Perlekjede',
+'Safirøye','Rubinklo','Smaragdpels','Ametyst','Opal','Krystallklo','Sølvpote','Gulltass','Bronsevinge','Platinastjert'];
+
+const ANIMAL_SPECIES = ['katt','kanin','rev','panda','koala','bjorn','gris','mus','ugle','sau'];
+const SPECIES_LABELS = {katt:'Katt',kanin:'Kanin',rev:'Rev',panda:'Panda',koala:'Koala',bjorn:'Bjørn',gris:'Gris',mus:'Mus',ugle:'Ugle',sau:'Sau'};
+const SPECIES_PALETTES = {
+  katt: ['#C68642','#4A3728','#FFFFFF','#90A4AE','#F8BBD0'],
+  kanin: ['#FFFFFF','#F8BBD0','#D7CCC8','#B39DDB'],
+  rev: ['#E8823C','#D9702A','#F4A460','#C96A2E'],
+  panda: ['#FFFFFF'],
+  koala: ['#90A4AE','#B0BEC5','#78909C','#A1887F'],
+  bjorn: ['#8B5A2B','#4A3728','#C68642','#A1887F'],
+  gris: ['#FFB6C1','#F8BBD0','#FF9EC7','#FFC1CC'],
+  mus: ['#D7CCC8','#A1887F','#90A4AE','#B0B0B0'],
+  ugle: ['#8B5A2B','#A1887F','#90A4AE','#D7CCC8'],
+  sau: ['#FFF8E7','#F5F0DC','#FFFFFF']
+};
+
+const ENGLISH_WORDS = [
+  {no:'hund', answers:['dog']},
+  {no:'katt', answers:['cat']},
+  {no:'sol', answers:['sun']},
+  {no:'måne', answers:['moon']},
+  {no:'vann', answers:['water']},
+  {no:'hus', answers:['house']},
+  {no:'bil', answers:['car']},
+  {no:'bok', answers:['book']},
+  {no:'eple', answers:['apple']},
+  {no:'fisk', answers:['fish']},
+  {no:'fugl', answers:['bird']},
+  {no:'blomst', answers:['flower']},
+  {no:'tre', answers:['tree']},
+  {no:'stjerne', answers:['star']},
+  {no:'hatt', answers:['hat']},
+  {no:'sko', answers:['shoe','shoes']},
+  {no:'stol', answers:['chair']},
+  {no:'bord', answers:['table']},
+  {no:'melk', answers:['milk']},
+  {no:'brød', answers:['bread']},
+  {no:'rød', answers:['red']},
+  {no:'blå', answers:['blue']},
+  {no:'grønn', answers:['green']},
+  {no:'gul', answers:['yellow']},
+  {no:'mamma', answers:['mom','mum','mother']},
+  {no:'pappa', answers:['dad','father','papa']},
+  {no:'venn', answers:['friend']},
+  {no:'skole', answers:['school']},
+  {no:'ball', answers:['ball']},
+  {no:'regn', answers:['rain']},
+  {no:'banan', answers:['banana']},
+  {no:'is', answers:['ice']},
+  {no:'kake', answers:['cake']},
+  {no:'øye', answers:['eye']},
+  {no:'hånd', answers:['hand']},
+  {no:'fot', answers:['foot']},
+  {no:'nese', answers:['nose']},
+  {no:'munn', answers:['mouth']},
+  {no:'øre', answers:['ear']},
+  {no:'hår', answers:['hair']},
+  {no:'snø', answers:['snow']},
+  {no:'vind', answers:['wind']},
+  {no:'sky', answers:['cloud']},
+  {no:'natt', answers:['night']},
+  {no:'dag', answers:['day']},
+  {no:'seng', answers:['bed']},
+  {no:'dør', answers:['door']},
+  {no:'vindu', answers:['window']},
+  {no:'bjørn', answers:['bear']},
+  {no:'sommerfugl', answers:['butterfly']},
+  {no:'sommer', answers:['summer']},
+  {no:'vinter', answers:['winter']},
+  {no:'gress', answers:['grass']},
+  {no:'sjø', answers:['sea']},
+  {no:'elv', answers:['river']},
+  {no:'fjell', answers:['mountain']},
+  {no:'lys', answers:['light']},
+  {no:'mørk', answers:['dark']},
+  {no:'varm', answers:['warm']},
+  {no:'kald', answers:['cold']},
+  {no:'stor', answers:['big']},
+  {no:'liten', answers:['small']},
+  {no:'rask', answers:['fast']},
+  {no:'sakte', answers:['slow']},
+  {no:'glad', answers:['happy']},
+  {no:'trist', answers:['sad']},
+  {no:'sulten', answers:['hungry']},
+  {no:'tørst', answers:['thirsty']},
+  {no:'tallerken', answers:['plate']},
+  {no:'gaffel', answers:['fork']},
+  {no:'kniv', answers:['knife']},
+  {no:'skje', answers:['spoon']},
+  {no:'kopp', answers:['cup']},
+  {no:'lampe', answers:['lamp']},
+  {no:'klokke', answers:['clock']},
+  {no:'penn', answers:['pen']},
+  {no:'blyant', answers:['pencil']},
+  {no:'sekk', answers:['bag']},
+  {no:'bru', answers:['bridge']},
+  {no:'båt', answers:['boat']}
+];
+
+const ANIMAL_COUNT = ENGLISH_WORDS.length;
+
+const HATS = [
+  {id:'party', name:'Festhatt', price:12, emoji:'🎉'},
+  {id:'cap', name:'Caps', price:16, emoji:'🧢'},
+  {id:'flowercrown', name:'Blomsterkrans', price:18, emoji:'🌼'},
+  {id:'sunhat', name:'Sommerhatt', price:18, emoji:'👒'},
+  {id:'winter', name:'Vinterlue', price:20, emoji:'🧶'},
+  {id:'tophat', name:'Flosshatt', price:24, emoji:'🎩'},
+  {id:'pirate', name:'Piratlue', price:28, emoji:'🏴‍☠️'},
+  {id:'viking', name:'Vikinghjelm', price:32, emoji:'🪖'},
+  {id:'goldcrown', name:'Gullkrone', price:50, emoji:'👑'},
+  {id:'rainbowhat', name:'Regnbuehatt', price:60, emoji:'🌈'}
+];
+
+const CLOTHES = [
+  {id:'sweater_pink', name:'Rosa genser', price:26, emoji:'🧶', slot:'torso', shape:'sweater', color:'#FF9EC7'},
+  {id:'sweater_blue', name:'Blå genser', price:26, emoji:'🧶', slot:'torso', shape:'sweater', color:'#5CA8FF'},
+  {id:'sweater_green', name:'Grønn genser', price:26, emoji:'🧶', slot:'torso', shape:'sweater', color:'#4FD1A5'},
+  {id:'sweater_yellow', name:'Gul genser', price:26, emoji:'🧶', slot:'torso', shape:'sweater', color:'#FFD54F'},
+  {id:'jacket_blue', name:'Blå jakke', price:36, emoji:'🧥', slot:'torso', shape:'jacket', color:'#5CA8FF'},
+  {id:'jacket_red', name:'Rød jakke', price:36, emoji:'🧥', slot:'torso', shape:'jacket', color:'#FF6B6B'},
+  {id:'jacket_purple', name:'Lilla jakke', price:36, emoji:'🧥', slot:'torso', shape:'jacket', color:'#C9A0FF'},
+  {id:'shoes_yellow', name:'Gule sko', price:18, emoji:'👟', slot:'feet', shape:'shoes', color:'#FFD54F'},
+  {id:'shoes_pink', name:'Rosa sko', price:18, emoji:'👟', slot:'feet', shape:'shoes', color:'#FF9EC7'},
+  {id:'shoes_blue', name:'Blå sko', price:18, emoji:'👟', slot:'feet', shape:'shoes', color:'#5CA8FF'},
+  {id:'shoes_purple', name:'Lilla sko', price:18, emoji:'👟', slot:'feet', shape:'shoes', color:'#C9A0FF'}
+];
+const CARD_RARITIES = [
+  {id:'vanlig', label:'Vanlig', weight:60, color:'#FFB6D1'},
+  {id:'sjelden', label:'Sjelden', weight:25, color:'#B0B0C8'},
+  {id:'episk', label:'Episk', weight:12, color:'#C9A0FF'},
+  {id:'legendarisk', label:'Legendarisk', weight:3, color:'#FFD700'}
+];
+const PACK_PRICE = 30;
+
+const CARS = [
+  {id:'red', name:'Rød Racer', price:400, color:'#FF6B6B', speedBonus:0},
+  {id:'blue', name:'Blå Blitz', price:500, color:'#5CA8FF', speedBonus:5},
+  {id:'green', name:'Grønn Growler', price:640, color:'#4FD1A5', speedBonus:10},
+  {id:'yellow', name:'Gul Lynet', price:800, color:'#FFD54F', speedBonus:15},
+  {id:'pink', name:'Rosa Rakett', price:960, color:'#FF9EC7', speedBonus:20},
+  {id:'gold', name:'Gullbilen', price:1300, color:'#FFD700', speedBonus:28}
+];
+
+const RIVALS = [
+  {name:'Rex Rocket', color:'#5CA8FF'},
+  {name:'Miss Whiskers', color:'#FF9EC7'},
+  {name:'Turbo Theo', color:'#FFD54F'},
+  {name:'Lynkongen', color:'#7EE8C7'},
+  {name:'Rakettrompen', color:'#C9A0FF'},
+  {name:'Blitz Bella', color:'#FF8A65'}
+];
+
+const CANDY_ITEMS = ['🍬','🍭','🍫','🍩','🍪'];
+const GROCERY_ITEMS = ['🥛','🍞','🧀','🥚','🍅','🥕','🥔','🍎','🍌','🥦','🐟','🍗','🧈','🥫','🍋','🧅','🥒','🍇','🍊','🥖','🧻','🧴','🪥','🧼','🥣','🧃','☕','🍯','🥩','🥨','🌽','🍄','🫐','🥑','🍆'];
+const CANDY_GRID_SIZE = 36;
+const CANDY_TIME_LIMIT = 60;
+const CANDY_MAX_MISSES = 3;
+
+const RACE_LENGTH = 2600;
+const RACE_MIN_SPEED = 120;
+const RACE_MAX_SPEED = 260;
+const RACE_TAP_KICK = 22;
+const RACE_DECAY_PER_SEC = 75;
+const RACE_TURBO_ADD = 150;
+const RACE_TURBO_CHARGES = 3;
+const RACE_PLACE_REWARDS = [20, 2, 1, 0];
+const RACE_AI_BASE_MIN = 175;
+const RACE_AI_BASE_RANGE = 35;
+const RACE_AI_WOBBLE = 16;
+const RACE_AI_BOOST_CHANCE_PER_SEC = 0.12;
+const RACE_AI_BOOST_AMOUNT = 32;
+const RACE_AI_CATCHUP_GAP = 220;
+const RACE_AI_CATCHUP_FACTOR = 0.09;
+const RACE_AI_CATCHUP_MAX = 40;
+
+const MATH_LEVELS = [
+  {min:0, name:'Regnespire', emoji:'🌱'},
+  {min:50, name:'Tallknuser', emoji:'⭐'},
+  {min:100, name:'Regnestjerne', emoji:'🌟'},
+  {min:200, name:'Mattemester', emoji:'🎯'},
+  {min:350, name:'Tallgeni', emoji:'🏅'},
+  {min:500, name:'Super-Matteekspert', emoji:'👑'}
+];
+function getMathLevel(totalCorrect){
+  let lvl = MATH_LEVELS[0];
+  for(const l of MATH_LEVELS){ if(totalCorrect>=l.min) lvl=l; }
+  return lvl;
+}
+function getNextMathLevel(totalCorrect){
+  return MATH_LEVELS.find(l=>l.min>totalCorrect) || null;
+}
+
+const POSITIVE_MESSAGES = ['Riktig! 🎉','Kjempebra! ⭐','Du er flink! 💪','Helt riktig! 🌈','Wow, så bra! ✨','Perfekt! 🎊'];
+const RETRY_MESSAGES = ['Nesten! Prøv igjen 😊','Du klarer det, prøv en gang til! 💪','Ikke helt riktig, prøv igjen! 🌈','Kom igjen, du fikser dette! ✨','Tenk deg om og prøv igjen 💛'];
+
+function makeEmptyParkBestTreats(){ return COURSES.map(()=>0); }
+function padParkBestTreats(arr){
+  const base = makeEmptyParkBestTreats();
+  if(Array.isArray(arr)){ arr.forEach((v,i)=>{ if(i<base.length) base[i]=v||0; }); }
+  return base;
+}
+
+let state = {dogsCollected:0, totalCorrect:0, muted:false, animalsCollected:0, character:null, characterType:'dog', parkCompleted:0, parkBestTreats:[0,0,0], coins:0, hatsOwned:[], equippedHat:null, cards:{}, carsOwned:[], selectedCar:null, clothesOwned:[], equippedTorso:null, equippedFeet:null, correctByOp:{'+':0,'-':0,'×':0}, mollyUnlocked:false};
+let shopTab = 'hats';
+let currentProblem = null;
+let currentInput = '';
+let wrongAttempts = 0;
+let currentEnglishProblem = null;
+let wrongAttemptsEnglish = 0;
+let albumTab = 'dogs';
+let audioCtx = null;
+let feedbackEl, hintBtn, feedbackElEnglish, hintBtnEnglish;
+
+const CANVAS_W = 960, CANVAS_H = 540;
+const GROUND_Y = 460;
+const GRAVITY = 1900;
+const JUMP_FORCE = 680;
+const MOVE_SPEED = 230;
+
+const THEMES = {
+  meadow: {skyTop:'#BEE3FF', skyMid:'#E5D4FF', skyBottom:'#FFE4EC', groundTop:'#B8EAC9', groundBottom:'#8FD9B0', hill:'rgba(201,160,255,0.35)', groundLine:'#6FBE93', foliage:'#8FD9B0', foliageLight:'#A8EFC5'},
+  autumn: {skyTop:'#FFD9A0', skyMid:'#FFC1CC', skyBottom:'#FFE4EC', groundTop:'#F2C185', groundBottom:'#E0A560', hill:'rgba(255,160,120,0.3)', groundLine:'#C98A48', foliage:'#E8A055', foliageLight:'#F4C07A'},
+  dusk: {skyTop:'#4A3F8A', skyMid:'#7A5FBF', skyBottom:'#FFB6D1', groundTop:'#B39DDB', groundBottom:'#8A6FC9', hill:'rgba(255,255,255,0.15)', groundLine:'#6B4FA0', foliage:'#6B5A9E', foliageLight:'#8577B8', night:true},
+  winter: {skyTop:'#DCEEFF', skyMid:'#EAF6FF', skyBottom:'#FFFFFF', groundTop:'#FFFFFF', groundBottom:'#D6EAF8', hill:'rgba(173,216,230,0.4)', groundLine:'#B0D8E8', foliage:'#B8E0D2', foliageLight:'#E0F5EE'},
+  beach: {skyTop:'#8CE0FF', skyMid:'#B8F0E8', skyBottom:'#FFF4D6', groundTop:'#F5E1A4', groundBottom:'#E8C97A', hill:'rgba(100,200,220,0.35)', groundLine:'#D4B168', foliage:'#4FD1A5', foliageLight:'#7EE8C7'},
+  space: {skyTop:'#1A1240', skyMid:'#3A2A6B', skyBottom:'#6B4FA0', groundTop:'#C9C9E0', groundBottom:'#9E9EC0', hill:'rgba(180,160,255,0.25)', groundLine:'#8080A8', foliage:'#7A5FBF', foliageLight:'#A08FD8', night:true},
+  candy: {skyTop:'#FFD6EC', skyMid:'#FFE8F5', skyBottom:'#FFF0FA', groundTop:'#FFB6D9', groundBottom:'#FF8FC2', hill:'rgba(255,182,217,0.4)', groundLine:'#E85DA8', foliage:'#FF9EC7', foliageLight:'#FFC1E0'},
+  rainbow: {skyTop:'#FFD6A5', skyMid:'#FFB3E6', skyBottom:'#B3D9FF', groundTop:'#FFE066', groundBottom:'#FF9E7A', hill:'rgba(255,255,255,0.3)', groundLine:'#E85D75', foliage:'#C9A0FF', foliageLight:'#FFD54F'}
+};
+
+const WORLD_LABELS = {1:'🌱 Verden 1', 2:'❄️ Verden 2', 3:'🏖️ Verden 3', 4:'🌌 Verden 4', 5:'🍬 Verden 5', 6:'🌈 Verden 6'};
+
+const COURSES = [
+  {
+    world:1, name:'Den grønne løkken', difficulty:'Lett 🟢', theme:'meadow',
+    width:1600, startX:80, goalX:1520,
+    gaps:[{x:600,w:80}],
+    platforms:[{x:520,y:390,w:90,h:20},{x:820,y:360,w:110,h:20},{x:1150,y:400,w:100,h:20}],
+    movingPlatforms:[],
+    checkpoints:[],
+    treats:[150,380,750,1000,1300,1450].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:565,y:370},{x:875,y:340},{x:1200,y:380}])
+  },
+  {
+    world:1, name:'Hoppeskogen', difficulty:'Middels 🟡', theme:'autumn',
+    width:2000, startX:80, goalX:1920,
+    gaps:[{x:500,w:110},{x:1100,w:130}],
+    platforms:[{x:750,y:370,w:100,h:20},{x:1450,y:350,w:100,h:20},{x:1700,y:400,w:110,h:20}],
+    movingPlatforms:[{baseX:1130,y:380,w:90,h:20,rangeX:70,speed:1.3}],
+    checkpoints:[{x:950}],
+    treats:[150,350,650,850,1300,1600,1850].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:800,y:350},{x:1500,y:330},{x:1755,y:380}])
+  },
+  {
+    world:1, name:'Stjernebanen', difficulty:'Vanskelig 🔴', theme:'dusk',
+    width:2400, startX:80, goalX:2320,
+    gaps:[{x:420,w:100},{x:850,w:140},{x:1450,w:150},{x:1950,w:120}],
+    platforms:[{x:280,y:380,w:80,h:20},{x:650,y:350,w:90,h:20},{x:1050,y:360,w:100,h:20},{x:1250,y:320,w:90,h:20},{x:1650,y:390,w:100,h:20},{x:2100,y:350,w:100,h:20}],
+    movingPlatforms:[{baseX:900,y:400,w:90,h:20,rangeX:80,speed:1.1},{baseX:1500,y:380,w:90,h:20,rangeX:90,speed:1.4}],
+    checkpoints:[{x:750},{x:1700}],
+    treats:[150,550,1150,1350,1800,2200,2280].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:320,y:360},{x:695,y:330},{x:1100,y:340},{x:1295,y:300},{x:1700,y:370},{x:2150,y:330}])
+  },
+  {
+    world:2, name:'Snøfonn', difficulty:'Middels-vanskelig 🟠', theme:'winter',
+    width:2200, startX:80, goalX:2120,
+    gaps:[{x:400,w:110},{x:800,w:120},{x:1300,w:140},{x:1750,w:100}],
+    platforms:[{x:280,y:370,w:80,h:20},{x:600,y:340,w:90,h:20},{x:1050,y:360,w:100,h:20},{x:1500,y:330,w:90,h:20},{x:1950,y:380,w:100,h:20}],
+    movingPlatforms:[{baseX:830,y:390,w:90,h:20,rangeX:70,speed:1.2}],
+    checkpoints:[{x:700},{x:1500}],
+    treats:[150,500,950,1450,1900,2080].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:320,y:350},{x:640,y:320},{x:1090,y:340},{x:1540,y:310},{x:1990,y:360},{x:1300,y:400},{x:750,y:400}])
+  },
+  {
+    world:2, name:'Isbanen', difficulty:'Vanskelig 🔴', theme:'winter',
+    width:2400, startX:80, goalX:2320,
+    gaps:[{x:380,w:120},{x:750,w:130},{x:1150,w:150},{x:1600,w:130},{x:2050,w:110}],
+    platforms:[{x:250,y:360,w:80,h:20},{x:900,y:340,w:90,h:20},{x:1350,y:310,w:80,h:20},{x:1850,y:360,w:90,h:20}],
+    movingPlatforms:[{baseX:780,y:400,w:80,h:20,rangeX:80,speed:1.3},{baseX:1620,y:380,w:80,h:20,rangeX:90,speed:1.5}],
+    checkpoints:[{x:700},{x:1400},{x:2000}],
+    treats:[150,500,1000,1450,1950,2280].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:290,y:330},{x:940,y:310},{x:1390,y:280},{x:1890,y:330},{x:1150,y:400},{x:2050,y:400}])
+  },
+  {
+    world:3, name:'Solstrand', difficulty:'Vanskelig 🔴', theme:'beach',
+    width:2400, startX:80, goalX:2320,
+    gaps:[{x:400,w:130},{x:850,w:140},{x:1350,w:120},{x:1800,w:150}],
+    platforms:[{x:280,y:370,w:80,h:20},{x:650,y:340,w:90,h:20},{x:1100,y:350,w:90,h:20},{x:1550,y:320,w:80,h:20},{x:2000,y:360,w:100,h:20}],
+    movingPlatforms:[{baseX:870,y:390,w:90,h:20,rangeX:80,speed:1.2,vertical:true,rangeY:50}],
+    checkpoints:[{x:700},{x:1600}],
+    treats:[150,550,1000,1500,1950,2280].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:320,y:340},{x:690,y:310},{x:1140,y:320},{x:1590,y:290},{x:2040,y:330},{x:1350,y:400}])
+  },
+  {
+    world:3, name:'Bølgebrettet', difficulty:'Vanskelig+ 🔴', theme:'beach',
+    width:2600, startX:80, goalX:2520,
+    gaps:[{x:380,w:130},{x:750,w:150},{x:1200,w:140},{x:1650,w:150},{x:2100,w:120}],
+    platforms:[{x:250,y:360,w:80,h:20},{x:900,y:330,w:80,h:20},{x:1400,y:350,w:80,h:20},{x:1950,y:320,w:80,h:20}],
+    movingPlatforms:[{baseX:780,y:390,w:80,h:20,rangeX:90,speed:1.3},{baseX:1670,y:400,w:80,h:20,rangeX:100,speed:1.1,vertical:true,rangeY:60}],
+    checkpoints:[{x:650},{x:1400},{x:2000}],
+    treats:[150,500,1000,1500,2000,2450].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:290,y:330},{x:940,y:300},{x:1440,y:320},{x:1990,y:290},{x:1200,y:400},{x:2100,y:400}])
+  },
+  {
+    world:4, name:'Stjernetåka', difficulty:'Ekspert 🟣', theme:'space',
+    width:2600, startX:80, goalX:2520,
+    gaps:[{x:380,w:140},{x:800,w:150},{x:1250,w:140},{x:1700,w:150},{x:2150,w:130}],
+    platforms:[{x:250,y:350,w:70,h:20},{x:950,y:320,w:70,h:20},{x:1450,y:340,w:70,h:20},{x:2000,y:310,w:70,h:20}],
+    movingPlatforms:[{baseX:820,y:390,w:80,h:20,rangeX:90,speed:1.4},{baseX:1720,y:380,w:80,h:20,rangeX:90,speed:1.2,vertical:true,rangeY:55}],
+    checkpoints:[{x:650},{x:1400},{x:2050}],
+    treats:[150,500,1000,1500,1950,2450].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:290,y:320},{x:990,y:290},{x:1490,y:310},{x:2040,y:280},{x:1250,y:400},{x:2150,y:400}])
+  },
+  {
+    world:4, name:'Meteorbanen', difficulty:'Ekspert 🟣', theme:'space',
+    width:2800, startX:80, goalX:2720,
+    gaps:[{x:360,w:140},{x:750,w:150},{x:1150,w:150},{x:1550,w:150},{x:1950,w:150},{x:2350,w:130}],
+    platforms:[{x:230,y:350,w:70,h:20},{x:1000,y:320,w:70,h:20},{x:1750,y:330,w:70,h:20},{x:2450,y:340,w:70,h:20}],
+    movingPlatforms:[{baseX:780,y:390,w:80,h:20,rangeX:90,speed:1.3},{baseX:1580,y:390,w:80,h:20,rangeX:90,speed:1.5,vertical:true,rangeY:60},{baseX:1980,y:400,w:80,h:20,rangeX:100,speed:1.2}],
+    checkpoints:[{x:650},{x:1350},{x:2050},{x:2600}],
+    treats:[150,480,950,1450,1900,2400,2650].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:270,y:320},{x:1040,y:290},{x:1790,y:300},{x:2490,y:310},{x:1150,y:400}])
+  },
+  {
+    world:5, name:'Godteriland', difficulty:'Ekspert+ 🟣', theme:'candy',
+    width:2600, startX:80, goalX:2520,
+    gaps:[{x:380,w:130},{x:780,w:140},{x:1200,w:150},{x:1650,w:140},{x:2100,w:130}],
+    platforms:[{x:250,y:360,w:70,h:20},{x:920,y:330,w:70,h:20},{x:1420,y:350,w:70,h:20},{x:1950,y:310,w:70,h:20}],
+    movingPlatforms:[{baseX:800,y:390,w:80,h:20,rangeX:85,speed:1.3},{baseX:1670,y:390,w:80,h:20,rangeX:90,speed:1.4,vertical:true,rangeY:55}],
+    checkpoints:[{x:650},{x:1400},{x:2000}],
+    treats:[150,500,1000,1500,1950,2450].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:290,y:330},{x:960,y:300},{x:1460,y:320},{x:1990,y:280},{x:1200,y:400},{x:2100,y:400}])
+  },
+  {
+    world:5, name:'Sukkerspinntårnet', difficulty:'Mester 🌟', theme:'candy',
+    width:2800, startX:80, goalX:2720,
+    gaps:[{x:360,w:140},{x:760,w:150},{x:1180,w:150},{x:1600,w:150},{x:2020,w:150},{x:2450,w:130}],
+    platforms:[{x:230,y:350,w:65,h:20},{x:1000,y:310,w:65,h:20},{x:1780,y:330,w:65,h:20},{x:2550,y:340,w:65,h:20}],
+    movingPlatforms:[{baseX:790,y:390,w:75,h:20,rangeX:95,speed:1.4},{baseX:1630,y:390,w:75,h:20,rangeX:95,speed:1.3,vertical:true,rangeY:60},{baseX:2050,y:400,w:75,h:20,rangeX:100,speed:1.5}],
+    checkpoints:[{x:650},{x:1350},{x:2000},{x:2600}],
+    treats:[150,480,950,1450,1900,2400,2650].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:270,y:320},{x:1040,y:280},{x:1820,y:300},{x:2590,y:310},{x:1180,y:400}])
+  },
+  {
+    world:6, name:'Regnbuebroen', difficulty:'Mester 🌟', theme:'rainbow',
+    width:3000, startX:80, goalX:2920,
+    gaps:[{x:360,w:140},{x:750,w:150},{x:1150,w:155},{x:1560,w:150},{x:1970,w:155},{x:2400,w:140}],
+    platforms:[{x:230,y:345,w:65,h:20},{x:1000,y:305,w:65,h:20},{x:1800,y:325,w:65,h:20},{x:2560,y:335,w:65,h:20}],
+    movingPlatforms:[{baseX:780,y:385,w:75,h:20,rangeX:95,speed:1.4},{baseX:1610,y:385,w:75,h:20,rangeX:100,speed:1.3,vertical:true,rangeY:60},{baseX:2040,y:395,w:75,h:20,rangeX:100,speed:1.5}],
+    checkpoints:[{x:650},{x:1350},{x:2000},{x:2650}],
+    treats:[150,480,950,1450,1900,2350,2800].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:270,y:315},{x:1040,y:275},{x:1840,y:295},{x:2600,y:305},{x:1150,y:400}])
+  },
+  {
+    world:6, name:'Toppen av regnbuen', difficulty:'LEGENDARISK 👑', theme:'rainbow', finale:true,
+    width:3200, startX:80, goalX:3100,
+    gaps:[{x:360,w:145},{x:740,w:150},{x:1140,w:155},{x:1550,w:155},{x:1960,w:155},{x:2380,w:150},{x:2800,w:140}],
+    platforms:[{x:230,y:340,w:60,h:20},{x:970,y:300,w:60,h:20},{x:1750,y:320,w:60,h:20},{x:2540,y:310,w:60,h:20}],
+    movingPlatforms:[{baseX:770,y:380,w:70,h:20,rangeX:100,speed:1.4},{baseX:1600,y:380,w:70,h:20,rangeX:105,speed:1.35,vertical:true,rangeY:65},{baseX:2020,y:390,w:70,h:20,rangeX:105,speed:1.5},{baseX:2830,y:390,w:70,h:20,rangeX:100,speed:1.3,vertical:true,rangeY:55}],
+    checkpoints:[{x:650},{x:1350},{x:2050},{x:2700}],
+    treats:[150,470,940,1400,1870,2330,2790,3050].map(x=>({x,y:GROUND_Y-18}))
+      .concat([{x:260,y:310},{x:1010,y:270},{x:1790,y:290},{x:2580,y:280},{x:1140,y:400}])
+  }
+];
+
+let world = null;
+let worldKeys = {left:false, right:false};
+let worldRafId = null;
+let worldCtx = null;
+let worldLastTs = null;
+
+let race = null;
+let raceRafId = null;
+let raceCtx = null;
+let raceLastTs = null;
+const RACE_LANE_Y = [325,375,425,475];
+
+let candyGame = null;
+let candyTimerId = null;
+
+function mulberry32(seed){
+  return function(){
+    seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function shadeColor(hex, percent){
+  const f = parseInt(hex.slice(1),16);
+  const t = percent<0 ? 0 : 255;
+  const p = Math.abs(percent);
+  const R=(f>>16)&0xFF, G=(f>>8)&0xFF, B=f&0xFF;
+  const nR = Math.round((t-R)*p)+R, nG = Math.round((t-G)*p)+G, nB = Math.round((t-B)*p)+B;
+  return '#' + (0x1000000 + nR*0x10000 + nG*0x100 + nB).toString(16).slice(1);
+}
+
+function getRarity(index){
+  const n = index+1;
+  if(n===100) return 'legendarisk';
+  if(n>=91) return 'super';
+  if(n>=71) return 'sjelden';
+  return 'vanlig';
+}
+
+function getDogData(index){
+  const seed = ((index+1)*2654435761) >>> 0;
+  const rnd = mulberry32(seed);
+  const fur = FUR_COLORS[Math.floor(rnd()*FUR_COLORS.length)];
+  const earShape = rnd()<0.5 ? 'floppy' : 'pointy';
+  const patternRoll = rnd();
+  const patternType = patternRoll<0.4 ? 'solid' : (patternRoll<0.75 ? 'spots' : 'patch');
+  const patchLeft = rnd()<0.5;
+  const rarity = getRarity(index);
+  let accessory;
+  if(rarity==='vanlig'){
+    const opts=['none','bow','flower','glasses','bandana'];
+    accessory = opts[Math.floor(rnd()*opts.length)];
+  } else if(rarity==='sjelden'){ accessory='crown'; }
+  else if(rarity==='super'){ accessory='crown-gem'; }
+  else { accessory='crown-rainbow'; }
+  const accessoryColor = ACCESSORY_COLORS[Math.floor(rnd()*ACCESSORY_COLORS.length)];
+  const medalBg = MEDAL_BG_PALETTE[Math.floor(rnd()*MEDAL_BG_PALETTE.length)];
+  return {index, number:index+1, name:DOG_NAMES[index], fur, earShape, patternType, patchLeft, accessory, accessoryColor, medalBg, rarity};
+}
+
+function buildHatOverlaySVG(hatId){
+  if(hatId==='tophat') return `<rect x="42" y="10" width="36" height="26" rx="3" fill="#2B2B2B"/><rect x="34" y="34" width="52" height="8" rx="3" fill="#2B2B2B"/><rect x="42" y="26" width="36" height="5" fill="#FF6FA5"/>`;
+  if(hatId==='cap') return `<path d="M30,34 Q60,4 90,34 L90,38 Q60,26 30,38 Z" fill="#5CA8FF"/><ellipse cx="82" cy="36" rx="14" ry="6" fill="#5CA8FF"/>`;
+  if(hatId==='party') return `<polygon points="60,4 78,38 42,38" fill="#FF6FA5"/><circle cx="60" cy="4" r="5" fill="#FFD54F"/><circle cx="52" cy="24" r="2.5" fill="#FFD54F"/><circle cx="66" cy="18" r="2.5" fill="#7EE8C7"/>`;
+  if(hatId==='winter') return `<path d="M32,36 Q32,6 60,6 Q88,6 88,36 Z" fill="#7EE8C7"/><rect x="30" y="32" width="60" height="8" rx="4" fill="#4FD1A5"/><circle cx="60" cy="6" r="7" fill="#fff"/>`;
+  if(hatId==='sunhat') return `<ellipse cx="60" cy="34" rx="46" ry="10" fill="#FFD54F"/><ellipse cx="60" cy="20" rx="24" ry="16" fill="#FFE082"/><circle cx="60" cy="20" r="5" fill="#FF6FA5"/>`;
+  if(hatId==='goldcrown') return `<polygon points="36,36 44,14 54,30 60,10 66,30 76,14 84,36" fill="#FFD700" stroke="#E0A800" stroke-width="2"/><circle cx="44" cy="14" r="4" fill="#FF6FA5"/><circle cx="60" cy="10" r="4.5" fill="#7EC8FF"/><circle cx="76" cy="14" r="4" fill="#7EE8C7"/>`;
+  if(hatId==='viking') return `<path d="M32,36 Q32,10 60,10 Q88,10 88,36 Z" fill="#B0B0C0"/><path d="M32,20 Q18,2 26,22" stroke="#F0E6D2" stroke-width="5" fill="none" stroke-linecap="round"/><path d="M88,20 Q102,2 94,22" stroke="#F0E6D2" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="60" cy="14" r="4" fill="#8A8A9A"/>`;
+  if(hatId==='flowercrown') return `<circle cx="34" cy="34" r="5" fill="#FF9EC7"/><circle cx="34" cy="34" r="2" fill="#FFD54F"/><circle cx="48" cy="20" r="5" fill="#C9A0FF"/><circle cx="48" cy="20" r="2" fill="#FFD54F"/><circle cx="60" cy="16" r="5" fill="#7EC8FF"/><circle cx="60" cy="16" r="2" fill="#FFD54F"/><circle cx="72" cy="20" r="5" fill="#FF9EC7"/><circle cx="72" cy="20" r="2" fill="#FFD54F"/><circle cx="86" cy="34" r="5" fill="#7EE8C7"/><circle cx="86" cy="34" r="2" fill="#FFD54F"/>`;
+  if(hatId==='pirate') return `<path d="M28,34 Q40,8 60,20 Q80,8 92,34 Q60,26 28,34 Z" fill="#2B2B2B"/><circle cx="60" cy="22" r="3" fill="#fff"/>`;
+  if(hatId==='rainbowhat') return `<rect x="42" y="10" width="36" height="26" rx="3" fill="#FF6FA5"/><rect x="42" y="10" width="36" height="5" fill="#FFD54F"/><rect x="42" y="18" width="36" height="5" fill="#7EE8C7"/><rect x="42" y="26" width="36" height="5" fill="#7EC8FF"/><rect x="34" y="34" width="52" height="8" rx="3" fill="#C9A0FF"/>`;
+  return '';
+}
+
+function buildTorsoOverlaySVG(clothingId){
+  const item = CLOTHES.find(c=>c.id===clothingId);
+  if(!item) return '';
+  const color = item.color;
+  const dark = shadeColor(color,-0.25);
+  if(item.shape==='sweater'){
+    return `<path d="M40,90 Q60,84 80,90 L84,110 Q60,118 36,110 Z" fill="${color}"/><line x1="46" y1="92" x2="46" y2="108" stroke="${dark}" stroke-width="2" opacity="0.5"/><line x1="54" y1="90" x2="54" y2="110" stroke="${dark}" stroke-width="2" opacity="0.5"/><line x1="66" y1="90" x2="66" y2="110" stroke="${dark}" stroke-width="2" opacity="0.5"/><line x1="74" y1="92" x2="74" y2="108" stroke="${dark}" stroke-width="2" opacity="0.5"/>`;
+  }
+  if(item.shape==='jacket'){
+    return `<path d="M38,88 L52,100 L60,90 L68,100 L82,88 L84,112 Q60,120 36,112 Z" fill="${color}"/><line x1="60" y1="94" x2="60" y2="116" stroke="${dark}" stroke-width="2"/>`;
+  }
+  return '';
+}
+
+function buildDogSVG(d){
+  const earShade = shadeColor(d.fur, -0.18);
+  const muzzleShade = shadeColor(d.fur, 0.5);
+  const spotShade = shadeColor(d.fur, -0.32);
+  const borderColor = RARITY_BORDER[d.rarity];
+
+  let ears = '';
+  if(d.earShape==='floppy'){
+    ears = `<ellipse cx="34" cy="58" rx="12" ry="21" transform="rotate(-18 34 58)" fill="${earShade}"/>
+            <ellipse cx="86" cy="58" rx="12" ry="21" transform="rotate(18 86 58)" fill="${earShade}"/>`;
+  } else {
+    ears = `<polygon points="26,44 40,10 48,50" fill="${earShade}"/>
+            <polygon points="94,44 80,10 72,50" fill="${earShade}"/>`;
+  }
+
+  let patternShape = '';
+  if(d.patternType==='spots'){
+    patternShape = `<ellipse cx="44" cy="56" rx="7" ry="6" fill="${spotShade}" opacity="0.85"/>
+                     <ellipse cx="78" cy="62" rx="6" ry="5" fill="${spotShade}" opacity="0.85"/>
+                     <ellipse cx="60" cy="46" rx="5" ry="4" fill="${spotShade}" opacity="0.8"/>`;
+  } else if(d.patternType==='patch'){
+    const side = d.patchLeft ? 48 : 72;
+    patternShape = `<circle cx="${side}" cy="62" r="13" fill="${spotShade}" opacity="0.9"/>`;
+  }
+
+  let accessory = '';
+  const ac = d.accessoryColor;
+  if(d.accessory==='bow'){
+    accessory = `<polygon points="60,30 46,20 46,40" fill="${ac}"/><polygon points="60,30 74,20 74,40" fill="${ac}"/><circle cx="60" cy="30" r="5" fill="${shadeColor(ac,-0.2)}"/>`;
+  } else if(d.accessory==='flower'){
+    accessory = `<g transform="translate(88,36)">
+       <circle cx="0" cy="-8" r="5" fill="${ac}"/><circle cx="7" cy="-2" r="5" fill="${ac}"/><circle cx="4" cy="7" r="5" fill="${ac}"/><circle cx="-4" cy="7" r="5" fill="${ac}"/><circle cx="-7" cy="-2" r="5" fill="${ac}"/>
+       <circle cx="0" cy="0" r="4" fill="#FFD54F"/></g>`;
+  } else if(d.accessory==='glasses'){
+    accessory = `<circle cx="48" cy="62" r="9" fill="none" stroke="#3B2F2F" stroke-width="3"/>
+                 <circle cx="72" cy="62" r="9" fill="none" stroke="#3B2F2F" stroke-width="3"/>
+                 <line x1="57" y1="62" x2="63" y2="62" stroke="#3B2F2F" stroke-width="3"/>`;
+  } else if(d.accessory==='bandana'){
+    accessory = `<polygon points="46,88 74,88 60,104" fill="${ac}"/>
+                 <circle cx="52" cy="91" r="2" fill="#fff"/><circle cx="68" cy="91" r="2" fill="#fff"/>`;
+  } else if(d.accessory==='crown' || d.accessory==='crown-gem' || d.accessory==='crown-rainbow'){
+    const colors = d.accessory==='crown-rainbow' ? ['#FF6FA5','#FFD54F','#7EE8C7','#7EC8FF'] : ['#FFD700','#FFD700','#FFD700','#FFD700'];
+    accessory = `<polygon points="40,36 46,18 54,32 60,14 66,32 74,18 80,36" fill="${colors[1]}" stroke="#E0A800" stroke-width="1.5"/>
+      <circle cx="46" cy="18" r="3" fill="${colors[0]}"/><circle cx="60" cy="14" r="3.5" fill="${colors[1]}"/><circle cx="74" cy="18" r="3" fill="${colors[3]}"/>`;
+    if(d.accessory==='crown-gem'){
+      accessory += `<circle cx="60" cy="28" r="4" fill="${ac}"/>`;
+    }
+  } else if(d.accessory && d.accessory.indexOf('hat-')===0){
+    accessory = buildHatOverlaySVG(d.accessory.slice(4));
+  }
+
+  let sparkles = '';
+  const sparkleCount = d.rarity==='sjelden' ? 3 : d.rarity==='super' ? 5 : d.rarity==='legendarisk' ? 8 : 0;
+  for(let i=0;i<sparkleCount;i++){
+    const sx = 8 + (i*97)%104;
+    const sy = 8 + (i*53)%104;
+    sparkles += `<text x="${sx}" y="${sy}" font-size="${8+(i%3)*3}" fill="#FFD54F" opacity="0.85">✦</text>`;
+  }
+
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="60" r="57" fill="${d.medalBg}" stroke="${borderColor}" stroke-width="5"/>
+    ${sparkles}
+    ${ears}
+    <circle cx="60" cy="66" r="32" fill="${d.fur}"/>
+    <ellipse cx="60" cy="80" rx="17" ry="13" fill="${muzzleShade}"/>
+    ${patternShape}
+    <ellipse cx="60" cy="74" rx="5" ry="3.5" fill="#3B2F2F"/>
+    <path d="M52,84 Q60,90 68,84" stroke="#3B2F2F" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <circle cx="48" cy="60" r="4.3" fill="#3B2F2F"/>
+    <circle cx="72" cy="60" r="4.3" fill="#3B2F2F"/>
+    <circle cx="49.3" cy="58.3" r="1.3" fill="#fff"/>
+    <circle cx="73.3" cy="58.3" r="1.3" fill="#fff"/>
+    ${accessory}
+  </svg>`;
+}
+
+function getAnimalData(index){
+  const seed = ((index+1)*40503 + 7) >>> 0;
+  const rnd = mulberry32(seed);
+  const species = ANIMAL_SPECIES[index % ANIMAL_SPECIES.length];
+  const palette = SPECIES_PALETTES[species];
+  const fur = palette[Math.floor(rnd()*palette.length)];
+  const patternRoll = rnd();
+  const patternType = patternRoll<0.55 ? 'solid' : (patternRoll<0.85 ? 'spots' : 'patch');
+  const patchLeft = rnd()<0.5;
+  const medalBg = MEDAL_BG_PALETTE[Math.floor(rnd()*MEDAL_BG_PALETTE.length)];
+  const special = index === ANIMAL_COUNT-1;
+  return {index, number:index+1, name:ANIMAL_NAMES[index], species, fur, patternType, patchLeft, medalBg, special};
+}
+
+const MOLLY_DATA = {name:'Molly', breed:'Dvergsnauser', fur:'#E8B923'};
+
+function buildMollySVG(){
+  const fur = MOLLY_DATA.fur;
+  const earShade = shadeColor(fur, -0.25);
+  const beardShade = '#FFFAEE';
+
+  let sparkles = '';
+  for(let i=0;i<12;i++){
+    const sx = 6 + (i*97)%108;
+    const sy = 6 + (i*53)%108;
+    sparkles += `<text x="${sx}" y="${sy}" font-size="${8+(i%3)*3}" fill="#FFD700" opacity="0.9">✦</text>`;
+  }
+
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="mollyBg" cx="50%" cy="45%" r="65%">
+        <stop offset="0%" stop-color="#FFF6DA"/>
+        <stop offset="100%" stop-color="#FFE39A"/>
+      </radialGradient>
+    </defs>
+    <circle cx="60" cy="60" r="57" fill="url(#mollyBg)" stroke="#FFD700" stroke-width="5"/>
+    ${sparkles}
+    <polygon points="32,50 25,26 47,48" fill="${earShade}"/>
+    <polygon points="88,50 95,26 73,48" fill="${earShade}"/>
+    <circle cx="60" cy="66" r="32" fill="${fur}"/>
+    <circle cx="46" cy="90" r="9" fill="${beardShade}"/>
+    <circle cx="60" cy="95" r="10" fill="${beardShade}"/>
+    <circle cx="74" cy="90" r="9" fill="${beardShade}"/>
+    <circle cx="53" cy="82" r="7" fill="${beardShade}"/>
+    <circle cx="67" cy="82" r="7" fill="${beardShade}"/>
+    <ellipse cx="60" cy="74" rx="5" ry="3.5" fill="#3B2F2F"/>
+    <path d="M52,84 Q60,89 68,84" stroke="#3B2F2F" stroke-width="2" fill="none" stroke-linecap="round"/>
+    <circle cx="48" cy="58" r="4.3" fill="#3B2F2F"/>
+    <circle cx="72" cy="58" r="4.3" fill="#3B2F2F"/>
+    <circle cx="49.3" cy="56.3" r="1.3" fill="#fff"/>
+    <circle cx="73.3" cy="56.3" r="1.3" fill="#fff"/>
+    <path d="M41,50 Q47,41 54,48" stroke="${earShade}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <path d="M79,50 Q73,41 66,48" stroke="${earShade}" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+    <polygon points="60,30 53,22 60,16 67,22" fill="#FFD700" stroke="#E0A800" stroke-width="1.5"/>
+    <circle cx="60" cy="22" r="2.5" fill="#FF6FA5"/>
+  </svg>`;
+}
+
+function buildAnimalSVG(d){
+  const earShade = shadeColor(d.fur, -0.18);
+  const muzzleShade = shadeColor(d.fur, 0.5);
+  const spotShade = shadeColor(d.fur, -0.32);
+  const borderColor = d.special ? '#FF3D8A' : '#FFB6D1';
+  const s = d.species;
+
+  let ears = '';
+  let extra = '';
+
+  if(s==='katt'){
+    ears = `<polygon points="28,42 38,12 50,44" fill="${d.fur}"/><polygon points="34,36 40,20 46,38" fill="${shadeColor(d.fur,0.4)}"/>
+            <polygon points="92,42 82,12 70,44" fill="${d.fur}"/><polygon points="86,36 80,20 74,38" fill="${shadeColor(d.fur,0.4)}"/>`;
+    extra = `<line x1="20" y1="76" x2="40" y2="72" stroke="#3B2F2F" stroke-width="1.5"/><line x1="20" y1="82" x2="40" y2="82" stroke="#3B2F2F" stroke-width="1.5"/>
+             <line x1="100" y1="76" x2="80" y2="72" stroke="#3B2F2F" stroke-width="1.5"/><line x1="100" y1="82" x2="80" y2="82" stroke="#3B2F2F" stroke-width="1.5"/>`;
+  } else if(s==='kanin'){
+    ears = `<ellipse cx="46" cy="18" rx="9" ry="26" fill="${d.fur}"/><ellipse cx="46" cy="18" rx="4.5" ry="19" fill="${shadeColor(d.fur,0.4)}"/>
+            <ellipse cx="74" cy="18" rx="9" ry="26" fill="${d.fur}"/><ellipse cx="74" cy="18" rx="4.5" ry="19" fill="${shadeColor(d.fur,0.4)}"/>`;
+    extra = `<rect x="56" y="82" width="4" height="6" rx="1.5" fill="#fff"/><rect x="62" y="82" width="4" height="6" rx="1.5" fill="#fff"/>`;
+  } else if(s==='rev'){
+    ears = `<polygon points="30,44 40,12 52,46" fill="${d.fur}"/><polygon points="90,44 80,12 68,46" fill="${d.fur}"/>`;
+    extra = `<circle cx="38" cy="70" r="7" fill="#fff" opacity="0.7"/><circle cx="84" cy="70" r="7" fill="#fff" opacity="0.7"/>`;
+  } else if(s==='panda'){
+    ears = `<circle cx="34" cy="36" r="14" fill="#3B2F2F"/><circle cx="88" cy="36" r="14" fill="#3B2F2F"/>`;
+    extra = `<ellipse cx="48" cy="60" rx="10" ry="13" fill="#3B2F2F" opacity="0.85"/><ellipse cx="74" cy="60" rx="10" ry="13" fill="#3B2F2F" opacity="0.85"/>`;
+  } else if(s==='koala'){
+    ears = `<circle cx="26" cy="52" r="16" fill="${d.fur}"/><circle cx="26" cy="52" r="9" fill="${shadeColor(d.fur,0.3)}"/>
+            <circle cx="96" cy="52" r="16" fill="${d.fur}"/><circle cx="96" cy="52" r="9" fill="${shadeColor(d.fur,0.3)}"/>`;
+  } else if(s==='bjorn'){
+    ears = `<circle cx="35" cy="38" r="11" fill="${earShade}"/><circle cx="85" cy="38" r="11" fill="${earShade}"/>`;
+  } else if(s==='gris'){
+    ears = `<polygon points="30,40 44,16 50,44" fill="${d.fur}"/><polygon points="90,40 76,16 70,44" fill="${d.fur}"/>`;
+  } else if(s==='mus'){
+    ears = `<circle cx="32" cy="34" r="15" fill="${d.fur}"/><circle cx="32" cy="34" r="8" fill="${shadeColor(d.fur,0.3)}"/>
+            <circle cx="88" cy="34" r="15" fill="${d.fur}"/><circle cx="88" cy="34" r="8" fill="${shadeColor(d.fur,0.3)}"/>`;
+    extra = `<line x1="18" y1="78" x2="38" y2="74" stroke="#3B2F2F" stroke-width="1.2"/><line x1="18" y1="84" x2="38" y2="84" stroke="#3B2F2F" stroke-width="1.2"/>
+             <line x1="102" y1="78" x2="82" y2="74" stroke="#3B2F2F" stroke-width="1.2"/><line x1="102" y1="84" x2="82" y2="84" stroke="#3B2F2F" stroke-width="1.2"/>`;
+  } else if(s==='ugle'){
+    ears = `<polygon points="34,30 40,10 46,32" fill="${d.fur}"/><polygon points="86,30 80,10 74,32" fill="${d.fur}"/>`;
+    extra = `<circle cx="48" cy="60" r="13" fill="#fff"/><circle cx="72" cy="60" r="13" fill="#fff"/>`;
+  } else if(s==='sau'){
+    ears = `<ellipse cx="30" cy="56" rx="8" ry="12" fill="${shadeColor(d.fur,-0.3)}"/><ellipse cx="90" cy="56" rx="8" ry="12" fill="${shadeColor(d.fur,-0.3)}"/>`;
+    for(let i=0;i<10;i++){
+      const ang = (i/10)*Math.PI*2;
+      const wx = 60+Math.cos(ang)*34, wy = 50+Math.sin(ang)*34;
+      ears += `<circle cx="${wx.toFixed(1)}" cy="${wy.toFixed(1)}" r="9" fill="${d.fur}"/>`;
+    }
+  }
+
+  let patternShape = '';
+  if(d.patternType==='spots'){
+    patternShape = `<ellipse cx="44" cy="56" rx="7" ry="6" fill="${spotShade}" opacity="0.85"/>
+                     <ellipse cx="78" cy="62" rx="6" ry="5" fill="${spotShade}" opacity="0.85"/>`;
+  } else if(d.patternType==='patch'){
+    const side = d.patchLeft ? 48 : 72;
+    patternShape = `<circle cx="${side}" cy="62" r="12" fill="${spotShade}" opacity="0.9"/>`;
+  }
+
+  const beakOrSnout = s==='gris'
+    ? `<ellipse cx="60" cy="78" rx="12" ry="9" fill="${shadeColor(d.fur,0.3)}"/><circle cx="55" cy="78" r="2" fill="#3B2F2F"/><circle cx="65" cy="78" r="2" fill="#3B2F2F"/>`
+    : s==='ugle'
+    ? `<polygon points="55,76 65,76 60,86" fill="#FFA726"/>`
+    : `<ellipse cx="60" cy="80" rx="16" ry="12" fill="${muzzleShade}"/><ellipse cx="60" cy="74" rx="5" ry="3.5" fill="#3B2F2F"/>`;
+
+  let sparkles = '';
+  const sparkleCount = d.special ? 8 : 0;
+  for(let i=0;i<sparkleCount;i++){
+    const sx = 8 + (i*97)%104;
+    const sy = 8 + (i*53)%104;
+    sparkles += `<text x="${sx}" y="${sy}" font-size="${8+(i%3)*3}" fill="#FFD54F" opacity="0.85">✦</text>`;
+  }
+
+  let specialBow = '';
+  if(d.special){
+    specialBow = `<polygon points="60,30 46,20 46,40" fill="#FF6FA5"/><polygon points="60,30 74,20 74,40" fill="#FFD54F"/><circle cx="60" cy="30" r="5" fill="#C9A0FF"/>`;
+  }
+
+  const hatOverlay = d.hat ? buildHatOverlaySVG(d.hat) : '';
+  const torsoOverlay = d.torso ? buildTorsoOverlaySVG(d.torso) : '';
+
+  return `<svg viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="60" cy="60" r="57" fill="${d.medalBg}" stroke="${borderColor}" stroke-width="5"/>
+    ${sparkles}
+    ${ears}
+    <circle cx="60" cy="66" r="32" fill="${d.fur}"/>
+    ${patternShape}
+    ${beakOrSnout}
+    ${extra}
+    ${torsoOverlay}
+    <path d="M52,84 Q60,90 68,84" stroke="#3B2F2F" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+    <circle cx="48" cy="60" r="4.3" fill="#3B2F2F"/>
+    <circle cx="72" cy="60" r="4.3" fill="#3B2F2F"/>
+    <circle cx="49.3" cy="58.3" r="1.3" fill="#fff"/>
+    <circle cx="73.3" cy="58.3" r="1.3" fill="#fff"/>
+    ${specialBow}
+    ${hatOverlay}
+  </svg>`;
+}
+
+function loadState(){
+  try{
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      return {
+        dogsCollected: parsed.dogsCollected||0,
+        totalCorrect: parsed.totalCorrect||0,
+        muted: !!parsed.muted,
+        animalsCollected: parsed.animalsCollected||0,
+        character: (typeof parsed.character==='number') ? parsed.character : null,
+        characterType: (parsed.characterType==='animal' || parsed.characterType==='molly') ? parsed.characterType : 'dog',
+        parkCompleted: parsed.parkCompleted||0,
+        parkBestTreats: padParkBestTreats(parsed.parkBestTreats),
+        coins: parsed.coins||0,
+        hatsOwned: Array.isArray(parsed.hatsOwned) ? parsed.hatsOwned : [],
+        equippedHat: parsed.equippedHat || null,
+        cards: (parsed.cards && typeof parsed.cards==='object') ? parsed.cards : {},
+        carsOwned: Array.isArray(parsed.carsOwned) ? parsed.carsOwned : [],
+        selectedCar: parsed.selectedCar || null,
+        clothesOwned: Array.isArray(parsed.clothesOwned) ? parsed.clothesOwned : [],
+        equippedTorso: parsed.equippedTorso || null,
+        equippedFeet: parsed.equippedFeet || null,
+        correctByOp: (parsed.correctByOp && typeof parsed.correctByOp==='object') ? Object.assign({'+':0,'-':0,'×':0}, parsed.correctByOp) : {'+':0,'-':0,'×':0},
+        mollyUnlocked: !!parsed.mollyUnlocked
+      };
+    }
+  }catch(e){}
+  return {dogsCollected:0, totalCorrect:0, muted:false, animalsCollected:0, character:null, characterType:'dog', parkCompleted:0, parkBestTreats:makeEmptyParkBestTreats(), coins:0, hatsOwned:[], equippedHat:null, cards:{}, carsOwned:[], selectedCar:null, clothesOwned:[], equippedTorso:null, equippedFeet:null, correctByOp:{'+':0,'-':0,'×':0}, mollyUnlocked:false};
+}
+function saveState(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function ensureAudio(){ if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)(); }
+function playTone(freq, duration, type, delay, gainVal){
+  if(state.muted) return;
+  ensureAudio();
+  const t0 = audioCtx.currentTime + (delay||0);
+  const osc = audioCtx.createOscillator();
+  const gain = audioCtx.createGain();
+  osc.type = type||'sine';
+  osc.frequency.setValueAtTime(freq, t0);
+  gain.gain.setValueAtTime(0, t0);
+  gain.gain.linearRampToValueAtTime(gainVal||0.15, t0+0.02);
+  gain.gain.exponentialRampToValueAtTime(0.001, t0+duration);
+  osc.connect(gain).connect(audioCtx.destination);
+  osc.start(t0); osc.stop(t0+duration+0.05);
+}
+function playCorrectSound(){ playTone(523.25,0.15,'sine',0,0.15); playTone(659.25,0.15,'sine',0.1,0.15); playTone(783.99,0.25,'sine',0.2,0.15); }
+function playWrongSound(){ playTone(220,0.3,'sine',0,0.09); }
+function playSparkleSound(){ [880,1046.5,1318.5,1567.98].forEach((f,i)=>playTone(f,0.18,'triangle',i*0.08,0.08)); }
+function playTreatSound(){ playTone(700,0.1,'triangle',0,0.12); playTone(1000,0.12,'triangle',0.06,0.12); }
+function playJumpSound(){ playTone(500,0.08,'square',0,0.07); }
+
+function burstConfetti(x, y, count){
+  const layer = document.getElementById('confetti-layer');
+  const colors = ['#FF6FA5','#FFD54F','#C9A0FF','#FF9EC7','#7EE8C7','#FFFFFF'];
+  for(let i=0;i<count;i++){
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    const angle = Math.random()*Math.PI*2;
+    const dist = 70+Math.random()*170;
+    const dx = Math.cos(angle)*dist;
+    const dy = Math.sin(angle)*dist - 50;
+    el.style.setProperty('--dx', dx+'px');
+    el.style.setProperty('--dy', dy+'px');
+    el.style.setProperty('--rot', (Math.random()*720-360)+'deg');
+    el.style.left = x+'px';
+    el.style.top = y+'px';
+    el.style.background = colors[Math.floor(Math.random()*colors.length)];
+    const size = (6+Math.random()*6);
+    el.style.width = size+'px';
+    el.style.height = size+'px';
+    if(Math.random()<0.5) el.style.borderRadius='50%';
+    el.style.animationDuration = (0.8+Math.random()*0.6)+'s';
+    layer.appendChild(el);
+    el.addEventListener('animationend', ()=> el.remove());
+  }
+}
+
+function initSparkles(){
+  const layer = document.getElementById('sparkle-layer');
+  for(let i=0;i<18;i++){
+    const s = document.createElement('div');
+    s.className = 'sparkle';
+    s.textContent = Math.random()<0.5 ? '✦' : '✧';
+    s.style.left = Math.random()*100+'%';
+    s.style.top = Math.random()*100+'%';
+    s.style.fontSize = (10+Math.random()*14)+'px';
+    s.style.animationDelay = (Math.random()*4)+'s';
+    s.style.animationDuration = (3+Math.random()*3)+'s';
+    layer.appendChild(s);
+  }
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function randInt(min,max){ return min + Math.floor(Math.random()*(max-min+1)); }
+
+function generateProblem(){
+  const roll = Math.random();
+  if(roll < 1/3){
+    const b = randInt(1,98);
+    const a = randInt(1,100-b);
+    return {a,b,op:'+',answer:a+b};
+  } else if(roll < 2/3){
+    const a = randInt(2,100);
+    const b = randInt(1,a-1);
+    return {a,b,op:'-',answer:a-b};
+  } else {
+    const a = randInt(1,10);
+    const b = randInt(1,10);
+    return {a,b,op:'×',answer:a*b};
+  }
+}
+
+function updateAnswerDisplay(){
+  document.getElementById('answer-display').textContent = currentInput===''? '_' : currentInput;
+}
+
+function newProblem(){
+  currentProblem = generateProblem();
+  document.getElementById('problem-display').textContent = `${currentProblem.a} ${currentProblem.op} ${currentProblem.b} = ?`;
+  currentInput = '';
+  updateAnswerDisplay();
+  feedbackEl.textContent = '';
+  feedbackEl.className = 'feedback-msg';
+  wrongAttempts = 0;
+  hintBtn.classList.add('hidden');
+}
+
+function generateEnglishProblem(){
+  let entry = pickRandom(ENGLISH_WORDS);
+  if(currentEnglishProblem && ENGLISH_WORDS.length>1){
+    let guard = 0;
+    while(entry.no===currentEnglishProblem.no && guard<20){ entry = pickRandom(ENGLISH_WORDS); guard++; }
+  }
+  return entry;
+}
+
+function newEnglishProblem(){
+  currentEnglishProblem = generateEnglishProblem();
+  document.getElementById('english-problem-display').textContent = `Hva er "${currentEnglishProblem.no.toUpperCase()}" på engelsk?`;
+  const input = document.getElementById('english-input');
+  input.value = '';
+  feedbackElEnglish.textContent = '';
+  feedbackElEnglish.className = 'feedback-msg';
+  wrongAttemptsEnglish = 0;
+  hintBtnEnglish.classList.add('hidden');
+  input.focus();
+}
+
+function updateProgressUI(){
+  const collected = state.dogsCollected;
+  document.getElementById('progress-fill').style.width = collected+'%';
+  document.getElementById('progress-text').textContent = collected>=100 ? '🏆 Alle 100 hunder samlet!' : `${collected} / 100 hunder`;
+  document.getElementById('start-btn').textContent = collected>0 ? 'Fortsett å regne! ✨' : 'Start å regne! ✨';
+
+  const animals = state.animalsCollected;
+  document.getElementById('progress-fill-english').style.width = (animals/ANIMAL_COUNT*100)+'%';
+  document.getElementById('progress-text-english').textContent = animals>=ANIMAL_COUNT ? `🌟 Alle ${ANIMAL_COUNT} dyr samlet!` : `${animals} / ${ANIMAL_COUNT} dyr`;
+
+  const startEnglishBtn = document.getElementById('start-english-btn');
+  startEnglishBtn.classList.remove('hidden');
+  startEnglishBtn.textContent = animals>0 ? `Fortsett engelsk-utfordringen! 🐱 (${animals}/${ANIMAL_COUNT})` : 'Engelsk-utfordringen! 🐱✨';
+
+  document.getElementById('park-btn').classList.toggle('hidden', collected===0);
+  document.getElementById('open-shop-btn').classList.toggle('hidden', collected===0);
+  document.getElementById('race-btn').classList.toggle('hidden', state.carsOwned.length===0);
+  document.getElementById('candy-btn').classList.toggle('hidden', collected===0);
+  document.getElementById('coin-balance').textContent = collected>0 ? `🦴 ${state.coins} godbiter` : '';
+
+  const levelLine = document.getElementById('math-level-line');
+  if(state.totalCorrect>0){
+    const level = getMathLevel(state.totalCorrect);
+    levelLine.textContent = `📊 ${level.emoji} ${level.name} · ${state.totalCorrect} riktige svar`;
+    levelLine.classList.remove('hidden');
+  } else {
+    levelLine.classList.add('hidden');
+  }
+
+  refreshCharacterPreview();
+}
+
+function getCharacterSelection(){
+  if(state.characterType==='molly' && state.mollyUnlocked) return {type:'molly'};
+  if(state.characterType==='animal'){
+    if(state.character!==null && state.character<state.animalsCollected) return {type:'animal', index:state.character};
+    return null;
+  }
+  if(state.character!==null && state.character<state.dogsCollected) return {type:'dog', index:state.character};
+  return null;
+}
+
+function getCharacterDisplayInfo(){
+  const sel = getCharacterSelection();
+  if(sel && sel.type==='molly'){
+    return {type:'molly', data:MOLLY_DATA, svg:buildMollySVG(), name:MOLLY_DATA.name};
+  }
+  if(sel && sel.type==='animal'){
+    const data = getAnimalData(sel.index);
+    if(state.equippedHat) data.hat = state.equippedHat;
+    if(state.equippedTorso) data.torso = state.equippedTorso;
+    if(state.equippedFeet) data.feet = state.equippedFeet;
+    return {type:'animal', data, svg:buildAnimalSVG(data), name:data.name};
+  }
+  const idx = sel ? sel.index : 0;
+  const data = getDogData(idx);
+  if(state.equippedHat) data.accessory = 'hat-' + state.equippedHat;
+  return {type:'dog', data, svg:buildDogSVG(data), name:data.name};
+}
+
+function getWorldSpriteData(){
+  const info = getCharacterDisplayInfo();
+  if(info.type==='molly'){
+    return { fur: info.data.fur, earShape:'pointy', accessory:'hat-goldcrown' };
+  }
+  if(info.type==='animal'){
+    const pointyEared = ['katt','rev','ugle'];
+    return {
+      fur: info.data.fur,
+      earShape: pointyEared.includes(info.data.species) ? 'pointy' : 'floppy',
+      accessory: info.data.hat ? 'hat-'+info.data.hat : 'none',
+      torso: info.data.torso || null,
+      feet: info.data.feet || null
+    };
+  }
+  return info.data;
+}
+
+function refreshCharacterPreview(){
+  const previewEl = document.getElementById('start-dog-preview');
+  const labelEl = document.getElementById('character-label');
+  const changeBtn = document.getElementById('change-character-btn');
+  const sel = getCharacterSelection();
+  const info = getCharacterDisplayInfo();
+  previewEl.innerHTML = info.svg;
+  if(sel){
+    labelEl.textContent = `Din karakter: ${info.name} 🐾`;
+  } else if(state.dogsCollected>0){
+    labelEl.textContent = 'Velg en hund eller et dyr som karakteren din!';
+  } else {
+    labelEl.textContent = '';
+  }
+  changeBtn.classList.toggle('hidden', state.dogsCollected===0);
+  updateCompanionAvatars();
+}
+
+function updateCompanionAvatars(){
+  const sel = getCharacterSelection();
+  document.querySelectorAll('.companion-avatar').forEach(el=>{
+    if(sel){
+      el.innerHTML = getCharacterDisplayInfo().svg;
+      el.classList.remove('hidden');
+    } else {
+      el.classList.add('hidden');
+      el.innerHTML = '';
+    }
+  });
+}
+
+function openMathStatsModal(){
+  const card = document.getElementById('dog-modal-card');
+  const level = getMathLevel(state.totalCorrect);
+  const next = getNextMathLevel(state.totalCorrect);
+  const byOp = state.correctByOp || {'+':0,'-':0,'×':0};
+  card.innerHTML = `
+    <div class="new-banner">📊 DIN MATTE-PROGRESJON 📊</div>
+    <h2>${level.emoji} ${level.name}</h2>
+    <p class="modal-number">${state.totalCorrect} riktige svar totalt</p>
+    <p class="modal-number">➕ Plussstykker: ${byOp['+']||0}</p>
+    <p class="modal-number">➖ Minusstykker: ${byOp['-']||0}</p>
+    <p class="modal-number">✖️ Gangestykker: ${byOp['×']||0}</p>
+    ${next ? `<p class="subtitle">${next.min-state.totalCorrect} til neste nivå: ${next.emoji} ${next.name}</p>` : '<p class="modal-rarity rarity-legendarisk">Du har nådd toppnivået! 👑</p>'}
+    <button class="big-btn" id="modal-continue-btn">Fortsett å regne! ➡️</button>
+  `;
+  document.getElementById('dog-modal').classList.remove('hidden');
+  document.getElementById('modal-continue-btn').addEventListener('click', ()=>{
+    document.getElementById('dog-modal').classList.add('hidden');
+  });
+}
+
+function openMollyModal(isNew){
+  const card = document.getElementById('dog-modal-card');
+  const isCharacter = state.characterType==='molly';
+  card.innerHTML = `
+    ${isNew ? '<div class="new-banner">🎁 EN GAVE TIL DEG! 🎁</div>' : ''}
+    <div class="modal-dog-svg">${buildMollySVG()}</div>
+    <h2>Molly</h2>
+    <p class="modal-number">Dvergsnauser · Gull-hund ✨</p>
+    <p class="modal-rarity rarity-legendarisk">Helt unik, bare for deg! 👑</p>
+    <button class="big-btn" id="modal-continue-btn">${isNew ? 'Yay! 🎉' : 'Lukk'}</button>
+    ${!isNew ? `<button class="modal-secondary-btn ${isCharacter?'is-selected':''}" id="select-character-btn">${isCharacter ? '✓ Dette er karakteren din' : '⭐ Velg som karakter'}</button>` : ''}
+  `;
+  document.getElementById('dog-modal').classList.remove('hidden');
+  document.getElementById('modal-continue-btn').addEventListener('click', ()=>{
+    document.getElementById('dog-modal').classList.add('hidden');
+  });
+  if(!isNew){
+    const selectBtn = document.getElementById('select-character-btn');
+    if(selectBtn){
+      selectBtn.addEventListener('click', ()=>{
+        state.characterType = 'molly';
+        saveState();
+        refreshCharacterPreview();
+        openMollyModal(false);
+      });
+    }
+  }
+}
+
+function spawnFirework(x, y){
+  const colors = ['#FF6FA5','#FFD54F','#C9A0FF','#7EE8C7','#7EC8FF','#FFFFFF','#FF3D8A'];
+  const color = colors[Math.floor(Math.random()*colors.length)];
+  const layer = document.getElementById('confetti-layer');
+  const particleCount = 24;
+  for(let i=0;i<particleCount;i++){
+    const angle = (i/particleCount)*Math.PI*2;
+    const dist = 60+Math.random()*80;
+    const el = document.createElement('div');
+    el.className = 'firework-particle';
+    el.style.left = x+'px';
+    el.style.top = y+'px';
+    el.style.background = color;
+    el.style.setProperty('--fx', Math.cos(angle)*dist+'px');
+    el.style.setProperty('--fy', Math.sin(angle)*dist+'px');
+    el.style.animationDuration = (0.8+Math.random()*0.4)+'s';
+    layer.appendChild(el);
+    el.addEventListener('animationend', ()=> el.remove());
+  }
+  const flash = document.createElement('div');
+  flash.className = 'firework-flash';
+  flash.style.left = x+'px';
+  flash.style.top = y+'px';
+  layer.appendChild(flash);
+  flash.addEventListener('animationend', ()=> flash.remove());
+}
+
+function spawnGlitterBurst(count){
+  const layer = document.getElementById('confetti-layer');
+  for(let i=0;i<count;i++){
+    const el = document.createElement('div');
+    el.className = 'glitter-particle';
+    el.textContent = Math.random()<0.5 ? '✦' : '✧';
+    el.style.left = (Math.random()*100)+'vw';
+    el.style.top = (-10-Math.random()*20)+'vh';
+    el.style.fontSize = (14+Math.random()*18)+'px';
+    el.style.setProperty('--gx', (Math.random()*200-100)+'px');
+    el.style.animationDuration = (2+Math.random()*2)+'s';
+    el.style.animationDelay = (Math.random()*1.2)+'s';
+    layer.appendChild(el);
+    el.addEventListener('animationend', ()=> el.remove());
+  }
+}
+
+function celebrateMollySurprise(){
+  for(let i=0;i<10;i++){
+    setTimeout(()=> burstConfetti(Math.random()*window.innerWidth, window.innerHeight*0.2+Math.random()*window.innerHeight*0.3, 60), i*180);
+  }
+  for(let i=0;i<6;i++){
+    setTimeout(()=>{
+      spawnFirework(window.innerWidth*0.15+Math.random()*window.innerWidth*0.7, window.innerHeight*0.15+Math.random()*window.innerHeight*0.35);
+    }, 300+i*350);
+  }
+  spawnGlitterBurst(60);
+  setTimeout(()=> spawnGlitterBurst(40), 900);
+  playSparkleSound();
+  setTimeout(()=> playSparkleSound(), 500);
+  setTimeout(()=> playCorrectSound(), 900);
+}
+
+function pressForbiddenButton(){
+  celebrateMollySurprise();
+  if(!state.mollyUnlocked){
+    setTimeout(()=>{
+      state.mollyUnlocked = true;
+      state.characterType = 'molly';
+      saveState();
+      updateProgressUI();
+      openMollyModal(true);
+    }, 1800);
+  }
+}
+
+function openDogModal(data, isNew){
+  const card = document.getElementById('dog-modal-card');
+  const isCharacter = state.characterType==='dog' && state.character === data.index;
+  card.innerHTML = `
+    ${isNew ? '<div class="new-banner">✨ NY HUND! ✨</div>' : ''}
+    <div class="modal-dog-svg">${buildDogSVG(data)}</div>
+    <h2>${data.name}</h2>
+    <p class="modal-number">Hund #${data.number} av 100</p>
+    <p class="modal-rarity rarity-${data.rarity}">${RARITY_LABELS[data.rarity]}</p>
+    <button class="big-btn" id="modal-continue-btn">${isNew ? 'Fortsett å regne! ➡️' : 'Lukk'}</button>
+    ${!isNew ? `<button class="modal-secondary-btn ${isCharacter?'is-selected':''}" id="select-character-btn">${isCharacter ? '✓ Dette er karakteren din' : '⭐ Velg som karakter'}</button>` : ''}
+  `;
+  document.getElementById('dog-modal').classList.remove('hidden');
+  document.getElementById('modal-continue-btn').addEventListener('click', ()=>{
+    document.getElementById('dog-modal').classList.add('hidden');
+    if(isNew){
+      if(state.dogsCollected>=100){
+        showScreen('screen-complete');
+        celebrateComplete();
+      } else {
+        newProblem();
+      }
+    }
+  });
+  if(!isNew){
+    const selectBtn = document.getElementById('select-character-btn');
+    if(selectBtn){
+      selectBtn.addEventListener('click', ()=>{
+        state.characterType = 'dog';
+        state.character = data.index;
+        saveState();
+        refreshCharacterPreview();
+        openDogModal(data, false);
+      });
+    }
+  }
+  if(isNew){
+    burstConfetti(window.innerWidth/2, window.innerHeight*0.35, 70);
+    playSparkleSound();
+  }
+}
+
+function openAnimalModal(data, isNew){
+  const card = document.getElementById('dog-modal-card');
+  const isCharacter = state.characterType==='animal' && state.character === data.index;
+  card.innerHTML = `
+    ${isNew ? '<div class="new-banner">✨ NYTT DYR! ✨</div>' : ''}
+    <div class="modal-dog-svg">${buildAnimalSVG(data)}</div>
+    <h2>${data.name}</h2>
+    <p class="modal-number">${SPECIES_LABELS[data.species]} · Dyr #${data.number} av ${ANIMAL_COUNT}</p>
+    ${data.special ? '<p class="modal-rarity rarity-legendarisk">SUPER SØT! 👑✨</p>' : ''}
+    <button class="big-btn" id="modal-continue-btn">${isNew ? 'Fortsett med engelsk! ➡️' : 'Lukk'}</button>
+    ${!isNew ? `<button class="modal-secondary-btn ${isCharacter?'is-selected':''}" id="select-character-btn">${isCharacter ? '✓ Dette er karakteren din' : '⭐ Velg som karakter'}</button>` : ''}
+  `;
+  document.getElementById('dog-modal').classList.remove('hidden');
+  document.getElementById('modal-continue-btn').addEventListener('click', ()=>{
+    document.getElementById('dog-modal').classList.add('hidden');
+    if(isNew){
+      if(state.animalsCollected>=ANIMAL_COUNT){
+        showScreen('screen-english-complete');
+        celebrateComplete();
+      } else {
+        newEnglishProblem();
+      }
+    }
+  });
+  if(!isNew){
+    const selectBtn = document.getElementById('select-character-btn');
+    if(selectBtn){
+      selectBtn.addEventListener('click', ()=>{
+        state.characterType = 'animal';
+        state.character = data.index;
+        saveState();
+        refreshCharacterPreview();
+        openAnimalModal(data, false);
+      });
+    }
+  }
+  if(isNew){
+    burstConfetti(window.innerWidth/2, window.innerHeight*0.35, 70);
+    playSparkleSound();
+  }
+}
+
+function celebrateComplete(){
+  for(let i=0;i<6;i++){
+    setTimeout(()=> burstConfetti(Math.random()*window.innerWidth, -10, 40), i*300);
+  }
+}
+
+function handleCorrect(){
+  playCorrectSound();
+  const rect = document.querySelector('#screen-game .problem-card').getBoundingClientRect();
+  burstConfetti(rect.left+rect.width/2, rect.top+rect.height/2, 45);
+  feedbackEl.textContent = pickRandom(POSITIVE_MESSAGES);
+  feedbackEl.className = 'feedback-msg positive';
+  wrongAttempts = 0;
+  hintBtn.classList.add('hidden');
+  state.totalCorrect++;
+  if(!state.correctByOp) state.correctByOp = {'+':0,'-':0,'×':0};
+  state.correctByOp[currentProblem.op] = (state.correctByOp[currentProblem.op]||0)+1;
+  currentInput = '';
+  updateAnswerDisplay();
+
+  if(state.dogsCollected < 100){
+    const newIndex = state.dogsCollected;
+    state.dogsCollected++;
+    saveState();
+    updateProgressUI();
+    const data = getDogData(newIndex);
+    setTimeout(()=> openDogModal(data, true), 700);
+  } else {
+    saveState();
+    setTimeout(()=> newProblem(), 1200);
+  }
+}
+
+function handleWrong(){
+  playWrongSound();
+  const cardEl = document.querySelector('#screen-game .problem-card');
+  cardEl.classList.add('shake');
+  setTimeout(()=> cardEl.classList.remove('shake'), 500);
+  wrongAttempts++;
+  feedbackEl.textContent = pickRandom(RETRY_MESSAGES);
+  feedbackEl.className = 'feedback-msg retry';
+  currentInput = '';
+  updateAnswerDisplay();
+  if(wrongAttempts>=3){ hintBtn.classList.remove('hidden'); }
+}
+
+function submitAnswer(){
+  if(currentInput==='' || !currentProblem) return;
+  const val = parseInt(currentInput,10);
+  if(val===currentProblem.answer){ handleCorrect(); } else { handleWrong(); }
+}
+
+function handleEnglishCorrect(){
+  playCorrectSound();
+  const rect = document.getElementById('english-card').getBoundingClientRect();
+  burstConfetti(rect.left+rect.width/2, rect.top+rect.height/2, 45);
+  feedbackElEnglish.textContent = pickRandom(POSITIVE_MESSAGES);
+  feedbackElEnglish.className = 'feedback-msg positive';
+  wrongAttemptsEnglish = 0;
+  hintBtnEnglish.classList.add('hidden');
+  document.getElementById('english-input').value = '';
+
+  if(state.animalsCollected < ANIMAL_COUNT){
+    const newIndex = state.animalsCollected;
+    state.animalsCollected++;
+    saveState();
+    updateProgressUI();
+    const data = getAnimalData(newIndex);
+    setTimeout(()=> openAnimalModal(data, true), 700);
+  } else {
+    saveState();
+    setTimeout(()=> newEnglishProblem(), 1200);
+  }
+}
+
+function handleEnglishWrong(){
+  playWrongSound();
+  const cardEl = document.getElementById('english-card');
+  cardEl.classList.add('shake');
+  setTimeout(()=> cardEl.classList.remove('shake'), 500);
+  wrongAttemptsEnglish++;
+  feedbackElEnglish.textContent = pickRandom(RETRY_MESSAGES);
+  feedbackElEnglish.className = 'feedback-msg retry';
+  const input = document.getElementById('english-input');
+  input.value = '';
+  input.focus();
+  if(wrongAttemptsEnglish>=3){ hintBtnEnglish.classList.remove('hidden'); }
+}
+
+function submitEnglishAnswer(){
+  const input = document.getElementById('english-input');
+  const val = input.value.trim().toLowerCase();
+  if(val==='' || !currentEnglishProblem) return;
+  if(currentEnglishProblem.answers.includes(val)){ handleEnglishCorrect(); } else { handleEnglishWrong(); }
+}
+
+function initNumpad(){
+  const pad = document.getElementById('numpad');
+  pad.innerHTML = '';
+  const keys = ['1','2','3','4','5','6','7','8','9','⌫','0','✔'];
+  keys.forEach(k=>{
+    const btn = document.createElement('button');
+    btn.className = 'num-btn' + (k==='✔' ? ' confirm' : '') + (k==='⌫' ? ' del' : '');
+    btn.textContent = k;
+    btn.addEventListener('click', ()=>{
+      if(k==='⌫'){ currentInput = currentInput.slice(0,-1); }
+      else if(k==='✔'){ submitAnswer(); return; }
+      else { if(currentInput.length<3) currentInput += k; }
+      updateAnswerDisplay();
+    });
+    pad.appendChild(btn);
+  });
+}
+
+function openAlbum(tab){
+  switchAlbumTab(tab || albumTab || 'dogs');
+  showScreen('screen-album');
+}
+
+function switchAlbumTab(tab){
+  albumTab = tab;
+  document.getElementById('tab-dogs').classList.toggle('active', tab==='dogs');
+  document.getElementById('tab-animals').classList.toggle('active', tab==='animals');
+  document.getElementById('album-title').textContent = tab==='dogs' ? 'Hundealbumet' : 'Dyrealbumet';
+
+  const dogGrid = document.getElementById('dog-grid');
+  const animalGrid = document.getElementById('animal-grid');
+  const lockedPanel = document.getElementById('animal-locked-panel');
+  const progressWrap = document.querySelector('#screen-album .album-progress');
+
+  if(tab==='dogs'){
+    dogGrid.classList.remove('hidden');
+    animalGrid.classList.add('hidden');
+    lockedPanel.classList.add('hidden');
+    progressWrap.classList.remove('hidden');
+    document.getElementById('progress-fill-album').style.width = state.dogsCollected+'%';
+    document.getElementById('progress-text-album').textContent = state.dogsCollected>=100 ? '🏆 Alle 100 hunder samlet!' : `${state.dogsCollected} / 100 hunder`;
+    renderDogGrid();
+  } else {
+    dogGrid.classList.add('hidden');
+    lockedPanel.classList.add('hidden');
+    animalGrid.classList.remove('hidden');
+    progressWrap.classList.remove('hidden');
+    document.getElementById('progress-fill-album').style.width = (state.animalsCollected/ANIMAL_COUNT*100)+'%';
+    document.getElementById('progress-text-album').textContent = state.animalsCollected>=ANIMAL_COUNT ? `🌟 Alle ${ANIMAL_COUNT} dyr samlet!` : `${state.animalsCollected} / ${ANIMAL_COUNT} dyr`;
+    renderAnimalGrid();
+  }
+}
+
+function renderDogGrid(){
+  const grid = document.getElementById('dog-grid');
+  grid.innerHTML = '';
+  for(let i=0;i<100;i++){
+    const slot = document.createElement('div');
+    const collected = i < state.dogsCollected;
+    if(collected){
+      const data = getDogData(i);
+      const isChar = state.characterType==='dog' && state.character === i;
+      slot.className = 'dog-slot collected ' + data.rarity + (isChar ? ' is-character' : '');
+      slot.innerHTML = buildDogSVG(data) + `<span class="dog-slot-name">${data.name}</span>` + (isChar ? '<span class="char-badge">⭐</span>' : '');
+      slot.addEventListener('click', ()=> openDogModal(data, false));
+    } else {
+      slot.className = 'dog-slot locked';
+      slot.innerHTML = `<div class="locked-icon">🐾</div><span class="dog-slot-name">#${i+1}</span>`;
+    }
+    grid.appendChild(slot);
+  }
+  if(state.mollyUnlocked){
+    const slot = document.createElement('div');
+    const isChar = state.characterType==='molly';
+    slot.className = 'dog-slot collected legendarisk' + (isChar ? ' is-character' : '');
+    slot.innerHTML = buildMollySVG() + `<span class="dog-slot-name">Molly ✨</span>` + (isChar ? '<span class="char-badge">⭐</span>' : '');
+    slot.addEventListener('click', ()=> openMollyModal(false));
+    grid.appendChild(slot);
+  }
+}
+
+function renderAnimalGrid(){
+  const grid = document.getElementById('animal-grid');
+  grid.innerHTML = '';
+  for(let i=0;i<ANIMAL_COUNT;i++){
+    const slot = document.createElement('div');
+    const collected = i < state.animalsCollected;
+    if(collected){
+      const data = getAnimalData(i);
+      const isChar = state.characterType==='animal' && state.character === i;
+      slot.className = 'dog-slot collected' + (data.special ? ' legendarisk' : '') + (isChar ? ' is-character' : '');
+      slot.innerHTML = buildAnimalSVG(data) + `<span class="dog-slot-name">${data.name}</span>` + (isChar ? '<span class="char-badge">⭐</span>' : '');
+      slot.addEventListener('click', ()=> openAnimalModal(data, false));
+    } else {
+      slot.className = 'dog-slot locked';
+      slot.innerHTML = `<div class="locked-icon">🐾</div><span class="dog-slot-name">#${i+1}</span>`;
+    }
+    grid.appendChild(slot);
+  }
+}
+
+function updateMuteIcon(){
+  document.querySelectorAll('.mute-toggle').forEach(btn=>{
+    btn.textContent = state.muted ? '🔇' : '🔊';
+  });
+}
+
+function roundRect(ctx,x,y,w,h,r){
+  ctx.beginPath();
+  ctx.moveTo(x+r,y);
+  ctx.arcTo(x+w,y,x+w,y+h,r);
+  ctx.arcTo(x+w,y+h,x,y+h,r);
+  ctx.arcTo(x,y+h,x,y,r);
+  ctx.arcTo(x,y,x+w,y,r);
+  ctx.closePath();
+}
+
+function isOverGap(course, x){
+  return (course.gaps||[]).some(g=> x>g.x && x<g.x+g.w);
+}
+
+function groundSegments(course){
+  const gaps = (course.gaps||[]).slice().sort((a,b)=>a.x-b.x);
+  const segs = [];
+  let cursor = 0;
+  gaps.forEach(g=>{
+    if(g.x>cursor) segs.push({x1:cursor,x2:g.x});
+    cursor = g.x+g.w;
+  });
+  if(cursor<course.width) segs.push({x1:cursor,x2:course.width});
+  return segs;
+}
+
+function buildDecorations(course){
+  const trees = [];
+  for(let x=220; x<course.width-100; x+=280){
+    if(!isOverGap(course,x)) trees.push({x, scale:0.8+((x*7)%50)/100});
+  }
+  const hills = [];
+  for(let x=100; x<course.width; x+=700){
+    hills.push({x, r:160+((x*3)%80)});
+  }
+  const clouds = [];
+  for(let x=150; x<course.width; x+=420){
+    clouds.push({x, y:50+((x*37)%90), speed:8+((x*13)%1000)%10});
+  }
+  return {trees, hills, clouds};
+}
+
+function setupWorldCanvas(){
+  const canvas = document.getElementById('world-canvas');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = CANVAS_W*dpr;
+  canvas.height = CANVAS_H*dpr;
+  worldCtx = canvas.getContext('2d');
+  worldCtx.setTransform(dpr,0,0,dpr,0,0);
+}
+
+function updateWorldHud(){
+  document.getElementById('world-course-heading').textContent = `Bane ${world.courseIndex+1}: ${world.course.name}`;
+  document.getElementById('world-treat-text').textContent = `🦴 ${world.collected} / ${world.total} godbiter`;
+}
+
+function enterWorld(courseIndex){
+  const course = COURSES[courseIndex];
+  const deco = buildDecorations(course);
+  const dogData = getWorldSpriteData();
+  world = {
+    courseIndex,
+    course,
+    camX: 0,
+    dog: {x:course.startX, y:GROUND_Y, vx:0, vy:0, onGround:true, facing:1, walkPhase:0, squash:0, standingOn:null},
+    dogData,
+    respawnX: course.startX,
+    respawnY: GROUND_Y,
+    treats: course.treats.map(t=>({x:t.x, y:t.y, collected:false})),
+    movingPlatforms: (course.movingPlatforms||[]).map(p=>({...p, x:p.baseX, prevX:p.baseX, baseY:p.y})),
+    checkpoints: (course.checkpoints||[]).map(cp=>({x:cp.x, touched:false})),
+    trees: deco.trees,
+    hills: deco.hills,
+    clouds: deco.clouds,
+    collected: 0,
+    total: course.treats.length,
+    finished:false,
+    allFoundShown:false,
+    message:'',
+    messageTimer:0
+  };
+  updateWorldHud();
+  setupWorldCanvas();
+  worldKeys.left = false;
+  worldKeys.right = false;
+  worldLastTs = null;
+  showScreen('screen-world');
+  if(worldRafId) cancelAnimationFrame(worldRafId);
+  worldRafId = requestAnimationFrame(worldTick);
+}
+
+function exitWorldToSelect(){
+  if(worldRafId){ cancelAnimationFrame(worldRafId); worldRafId = null; }
+  renderCourseList();
+  showScreen('screen-park-select');
+}
+
+function respawnDog(){
+  const dog = world.dog;
+  dog.x = world.respawnX;
+  dog.y = world.respawnY;
+  dog.vx = 0; dog.vy = 0; dog.onGround = true; dog.standingOn = null;
+  showWorldMessage('Oisann! Prøv igjen 😊');
+  playWrongSound();
+}
+
+function showWorldMessage(text){
+  world.message = text;
+  world.messageTimer = 2;
+}
+
+function checkTreatCollisions(){
+  const dog = world.dog;
+  world.treats.forEach(t=>{
+    if(t.collected) return;
+    const dx = dog.x - t.x;
+    const dy = (dog.y-30) - t.y;
+    if(Math.abs(dx)<34 && Math.abs(dy)<40){
+      t.collected = true;
+      world.collected++;
+      state.coins++;
+      saveState();
+      updateWorldHud();
+      playTreatSound();
+      const canvas = document.getElementById('world-canvas');
+      const rect = canvas.getBoundingClientRect();
+      const scale = rect.width/CANVAS_W;
+      const px = rect.left + (t.x-world.camX)*scale;
+      const py = rect.top + t.y*scale;
+      burstConfetti(px, py, 20);
+      if(world.collected>=world.total && !world.allFoundShown){
+        world.allFoundShown = true;
+        showWorldMessage('🌟 Alle godbiter funnet!');
+      }
+    }
+  });
+}
+
+function onCourseFinished(){
+  playSparkleSound();
+  celebrateComplete();
+  if(world.collected > (state.parkBestTreats[world.courseIndex]||0)){
+    state.parkBestTreats[world.courseIndex] = world.collected;
+  }
+  if(state.parkCompleted <= world.courseIndex){
+    state.parkCompleted = world.courseIndex+1;
+  }
+  saveState();
+  setTimeout(()=> openCourseCompleteModal(), 500);
+}
+
+function openCourseCompleteModal(){
+  const card = document.getElementById('dog-modal-card');
+  const course = world.course;
+  const hasNext = world.courseIndex+1 < COURSES.length;
+  card.innerHTML = `
+    <div class="new-banner">🏁 BANE FULLFØRT! 🏁</div>
+    <h2>${course.name}</h2>
+    <p class="modal-number">Du samlet ${world.collected} av ${world.total} godbiter 🦴</p>
+    ${hasNext ? '<button class="big-btn park-btn" id="next-course-btn">Neste bane! ➡️</button>' : '<p class="modal-rarity rarity-legendarisk">Du har fullført ALLE banene! 🏆</p>'}
+    <button class="secondary-btn" id="back-to-courses-btn">Tilbake til baner 🌳</button>
+  `;
+  document.getElementById('dog-modal').classList.remove('hidden');
+  const nextBtn = document.getElementById('next-course-btn');
+  if(nextBtn){
+    nextBtn.addEventListener('click', ()=>{
+      document.getElementById('dog-modal').classList.add('hidden');
+      enterWorld(world.courseIndex+1);
+    });
+  }
+  document.getElementById('back-to-courses-btn').addEventListener('click', ()=>{
+    document.getElementById('dog-modal').classList.add('hidden');
+    exitWorldToSelect();
+  });
+}
+
+function renderCourseList(){
+  const list = document.getElementById('course-list');
+  list.innerHTML = '';
+  let lastWorld = null;
+  COURSES.forEach((c,i)=>{
+    if(c.world !== lastWorld){
+      lastWorld = c.world;
+      const heading = document.createElement('div');
+      heading.className = 'world-heading';
+      heading.textContent = WORLD_LABELS[c.world] || `Verden ${c.world}`;
+      list.appendChild(heading);
+    }
+    const unlocked = i===0 || state.parkCompleted>=i;
+    const completed = state.parkCompleted>i;
+    const best = state.parkBestTreats[i]||0;
+    const btn = document.createElement('button');
+    btn.className = 'course-btn' + (unlocked ? '' : ' locked');
+    btn.innerHTML = `<span><span class="course-name">${unlocked?'':'🔒 '}Bane ${i+1}: ${c.name}</span><span class="course-sub">${c.difficulty}${unlocked?` · Beste: ${best}/${c.treats.length} godbiter`:''}</span></span><span class="course-badge">${completed?'✅':(unlocked?'▶️':'🔒')}</span>`;
+    if(unlocked){
+      btn.addEventListener('click', ()=> enterWorld(i));
+    }
+    list.appendChild(btn);
+  });
+}
+
+function openShop(tab){
+  shopTab = tab || shopTab || 'hats';
+  renderShop();
+  showScreen('screen-shop');
+}
+
+function renderShop(){
+  document.getElementById('shop-coin-text').textContent = `🦴 ${state.coins} godbiter`;
+  document.getElementById('shop-tab-hats').classList.toggle('active', shopTab==='hats');
+  document.getElementById('shop-tab-cards').classList.toggle('active', shopTab==='cards');
+  document.getElementById('shop-tab-vehicles').classList.toggle('active', shopTab==='vehicles');
+  document.getElementById('shop-tab-clothes').classList.toggle('active', shopTab==='clothes');
+  if(shopTab==='hats'){ renderHatShop(); }
+  else if(shopTab==='vehicles'){ renderVehicleShop(); }
+  else if(shopTab==='clothes'){ renderClothesShop(); }
+  else { renderCardShop(); }
+}
+
+function buyClothing(id){
+  const item = CLOTHES.find(c=>c.id===id);
+  if(!item || state.coins<item.price || state.clothesOwned.includes(id)) return;
+  state.coins -= item.price;
+  state.clothesOwned.push(id);
+  saveState();
+  playSparkleSound();
+  updateProgressUI();
+  renderShop();
+}
+
+function toggleEquipClothing(id){
+  const item = CLOTHES.find(c=>c.id===id);
+  if(!item || !state.clothesOwned.includes(id)) return;
+  if(item.slot==='torso'){
+    state.equippedTorso = state.equippedTorso===id ? null : id;
+  } else {
+    state.equippedFeet = state.equippedFeet===id ? null : id;
+  }
+  saveState();
+  updateProgressUI();
+  renderShop();
+}
+
+function renderClothesShop(){
+  const list = document.getElementById('shop-list');
+  list.innerHTML = '';
+  const note = document.createElement('p');
+  note.className = 'subtitle';
+  note.style.margin = '0 0 12px';
+  note.textContent = 'Klærne vises når karakteren din er et dyr 🐱';
+  list.appendChild(note);
+  const groups = [
+    {label:'🧶 Gensere', shape:'sweater'},
+    {label:'🧥 Jakker', shape:'jacket'},
+    {label:'👟 Sko', shape:'shoes'}
+  ];
+  groups.forEach(g=>{
+    const heading = document.createElement('div');
+    heading.className = 'world-heading';
+    heading.textContent = g.label;
+    list.appendChild(heading);
+    CLOTHES.filter(c=>c.shape===g.shape).forEach(item=>{
+      const owned = state.clothesOwned.includes(item.id);
+      const equipped = item.slot==='torso' ? state.equippedTorso===item.id : state.equippedFeet===item.id;
+      const row = document.createElement('div');
+      row.className = 'shop-item';
+      row.innerHTML = `<span class="car-swatch" style="background:${item.color}">${item.emoji}</span><span class="shop-item-info"><span class="shop-item-name">${item.name}</span><span class="shop-item-price">${owned ? (equipped?'På karakteren nå':'Eid') : item.price+' 🦴'}</span></span>`;
+      const btn = document.createElement('button');
+      btn.className = 'shop-buy-btn' + (equipped ? ' equipped' : '');
+      if(!owned){
+        btn.textContent = 'Kjøp';
+        btn.disabled = state.coins < item.price;
+        btn.addEventListener('click', ()=> buyClothing(item.id));
+      } else {
+        btn.textContent = equipped ? 'Ta av' : 'Ta på';
+        btn.addEventListener('click', ()=> toggleEquipClothing(item.id));
+      }
+      row.appendChild(btn);
+      list.appendChild(row);
+    });
+  });
+}
+
+function renderVehicleShop(){
+  const list = document.getElementById('shop-list');
+  list.innerHTML = '';
+  CARS.forEach(c=>{
+    const owned = state.carsOwned.includes(c.id);
+    const selected = state.selectedCar===c.id;
+    const row = document.createElement('div');
+    row.className = 'shop-item';
+    row.innerHTML = `<span class="car-swatch" style="background:${c.color}">🏎️</span><span class="shop-item-info"><span class="shop-item-name">${c.name}</span><span class="shop-item-price">${owned ? (selected ? 'I bruk nå' : 'Eid · fart +'+c.speedBonus) : c.price+' 🦴 · fart +'+c.speedBonus}</span></span>`;
+    const btn = document.createElement('button');
+    btn.className = 'shop-buy-btn' + (selected ? ' equipped' : '');
+    if(!owned){
+      btn.textContent = 'Kjøp';
+      btn.disabled = state.coins < c.price;
+      btn.addEventListener('click', ()=> buyCar(c.id));
+    } else {
+      btn.textContent = selected ? 'I bruk' : 'Velg';
+      btn.disabled = selected;
+      btn.addEventListener('click', ()=> selectCar(c.id));
+    }
+    row.appendChild(btn);
+    list.appendChild(row);
+  });
+}
+
+function buyCar(id){
+  const car = CARS.find(c=>c.id===id);
+  if(!car || state.coins<car.price || state.carsOwned.includes(id)) return;
+  state.coins -= car.price;
+  state.carsOwned.push(id);
+  if(!state.selectedCar) state.selectedCar = id;
+  saveState();
+  playSparkleSound();
+  updateProgressUI();
+  renderShop();
+}
+
+function selectCar(id){
+  if(!state.carsOwned.includes(id)) return;
+  state.selectedCar = id;
+  saveState();
+  renderShop();
+}
+
+function shuffleArray(arr){
+  const a = arr.slice();
+  for(let i=a.length-1;i>0;i--){
+    const j = Math.floor(Math.random()*(i+1));
+    [a[i],a[j]] = [a[j],a[i]];
+  }
+  return a;
+}
+
+function buildCandyBoard(){
+  const cells = CANDY_ITEMS.map(emoji => ({emoji, isCandy:true, collected:false}));
+  const groceryCount = CANDY_GRID_SIZE - CANDY_ITEMS.length;
+  for(let i=0;i<groceryCount;i++){
+    const emoji = GROCERY_ITEMS[Math.floor(Math.random()*GROCERY_ITEMS.length)];
+    cells.push({emoji, isCandy:false, collected:false});
+  }
+  return shuffleArray(cells);
+}
+
+function enterCandyGame(){
+  candyGame = {
+    board: buildCandyBoard(),
+    found: 0,
+    misses: 0,
+    timeLeft: CANDY_TIME_LIMIT,
+    finished: false
+  };
+  renderCandyBoard();
+  updateCandyHud();
+  showScreen('screen-candy');
+  if(candyTimerId){ clearInterval(candyTimerId); }
+  candyTimerId = setInterval(candyTick, 1000);
+}
+
+function exitCandyGame(){
+  if(candyTimerId){ clearInterval(candyTimerId); candyTimerId = null; }
+  showScreen('screen-start');
+}
+
+function candyTick(){
+  if(!candyGame || candyGame.finished) return;
+  candyGame.timeLeft--;
+  updateCandyHud();
+  if(candyGame.timeLeft<=0){
+    candyGame.finished = true;
+    clearInterval(candyTimerId);
+    candyTimerId = null;
+    finishCandyGame(false, false);
+  }
+}
+
+function updateCandyHud(){
+  const timerEl = document.getElementById('candy-timer-text');
+  timerEl.textContent = `⏱️ ${Math.max(0,candyGame.timeLeft)}s`;
+  timerEl.classList.toggle('candy-timer-urgent', candyGame.timeLeft<=10 && candyGame.timeLeft>0);
+  document.getElementById('candy-basket-text').textContent = `🧺 ${candyGame.found} / ${CANDY_ITEMS.length} godteri`;
+  const livesLeft = Math.max(0, CANDY_MAX_MISSES - candyGame.misses);
+  document.getElementById('candy-lives-text').textContent = '❤️'.repeat(livesLeft) + '🤍'.repeat(CANDY_MAX_MISSES-livesLeft);
+}
+
+function renderCandyBoard(){
+  const grid = document.getElementById('candy-grid');
+  grid.innerHTML = '';
+  candyGame.board.forEach((cell,i)=>{
+    const btn = document.createElement('button');
+    btn.className = 'candy-cell';
+    btn.textContent = cell.emoji;
+    btn.dataset.index = i;
+    grid.appendChild(btn);
+  });
+}
+
+function handleCandyCellClick(index){
+  if(!candyGame || candyGame.finished) return;
+  const cell = candyGame.board[index];
+  if(!cell || cell.collected) return;
+  const grid = document.getElementById('candy-grid');
+  const btn = grid.children[index];
+  if(cell.isCandy){
+    cell.collected = true;
+    candyGame.found++;
+    btn.classList.add('candy-found');
+    btn.disabled = true;
+    playTreatSound();
+    const rect = btn.getBoundingClientRect();
+    burstConfetti(rect.left+rect.width/2, rect.top+rect.height/2, 18);
+    updateCandyHud();
+    if(candyGame.found>=CANDY_ITEMS.length){
+      candyGame.finished = true;
+      if(candyTimerId){ clearInterval(candyTimerId); candyTimerId = null; }
+      setTimeout(()=> finishCandyGame(true, false), 400);
+    }
+  } else {
+    playWrongSound();
+    btn.classList.add('candy-miss');
+    setTimeout(()=> btn.classList.remove('candy-miss'), 400);
+    candyGame.misses++;
+    updateCandyHud();
+    if(candyGame.misses>=CANDY_MAX_MISSES){
+      candyGame.finished = true;
+      if(candyTimerId){ clearInterval(candyTimerId); candyTimerId = null; }
+      setTimeout(()=> finishCandyGame(false, true), 500);
+    }
+  }
+}
+
+function finishCandyGame(won, outOfLives){
+  let reward = 0;
+  if(won){
+    reward = 10 + Math.round((candyGame.timeLeft/CANDY_TIME_LIMIT)*10);
+    state.coins += reward;
+    saveState();
+    updateProgressUI();
+    celebrateComplete();
+    playSparkleSound();
+  } else {
+    playWrongSound();
+  }
+  setTimeout(()=> openCandyResultsModal(won, reward, outOfLives), won?500:300);
+}
+
+function openCandyResultsModal(won, reward, outOfLives){
+  const card = document.getElementById('dog-modal-card');
+  const banner = won ? '🍬 GODTERI FUNNET! 🍬' : (outOfLives ? '💔 INGEN FLERE FORSØK! 💔' : '⏰ TIDEN ER UTE! ⏰');
+  card.innerHTML = `
+    <div class="new-banner">${banner}</div>
+    <p class="modal-number">Du fant ${candyGame.found} av ${CANDY_ITEMS.length} godteri</p>
+    ${won ? `<p class="modal-rarity rarity-legendarisk">+${reward} godbiter! 🦴</p>` : '<p class="subtitle">Ikke helt denne gangen. Prøv igjen – du klarer det!</p>'}
+    <button class="big-btn candy-btn" id="candy-again-btn">Spill igjen! 🍬</button>
+    <button class="secondary-btn" id="candy-exit-btn">Tilbake til start 🏠</button>
+  `;
+  document.getElementById('dog-modal').classList.remove('hidden');
+  document.getElementById('candy-again-btn').addEventListener('click', ()=>{
+    document.getElementById('dog-modal').classList.add('hidden');
+    enterCandyGame();
+  });
+  document.getElementById('candy-exit-btn').addEventListener('click', ()=>{
+    document.getElementById('dog-modal').classList.add('hidden');
+    showScreen('screen-start');
+  });
+}
+
+function getActiveCar(){
+  const id = (state.selectedCar && state.carsOwned.includes(state.selectedCar)) ? state.selectedCar : state.carsOwned[0];
+  return CARS.find(c=>c.id===id);
+}
+
+function enterRace(){
+  const car = getActiveCar();
+  if(!car) return;
+  const info = getCharacterDisplayInfo();
+  const rivals = shuffleArray(RIVALS).slice(0,3);
+  const racers = [
+    {name: info.name, color: car.color, isPlayer:true, x:0, speed:RACE_MIN_SPEED}
+  ].concat(rivals.map(r=>({
+    name:r.name, color:r.color, isPlayer:false, x:0,
+    speed:RACE_MIN_SPEED, baseSpeed: RACE_AI_BASE_MIN+Math.random()*RACE_AI_BASE_RANGE, phase: Math.random()*Math.PI*2,
+    boostTimer:0
+  })));
+  race = {
+    racers,
+    camX:0,
+    turboLeft: RACE_TURBO_CHARGES,
+    turboFlashTimer:0,
+    finished:false,
+    countdown:2.4
+  };
+  document.getElementById('race-status-text').textContent = 'Klar...';
+  const canvas = document.getElementById('race-canvas');
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = CANVAS_W*dpr;
+  canvas.height = CANVAS_H*dpr;
+  raceCtx = canvas.getContext('2d');
+  raceCtx.setTransform(dpr,0,0,dpr,0,0);
+  raceLastTs = null;
+  showScreen('screen-race');
+  if(raceRafId) cancelAnimationFrame(raceRafId);
+  raceRafId = requestAnimationFrame(raceTick);
+}
+
+function exitRace(){
+  if(raceRafId){ cancelAnimationFrame(raceRafId); raceRafId = null; }
+  showScreen('screen-start');
+}
+
+function finishRace(){
+  const standings = race.racers.slice().sort((a,b)=> b.x-a.x);
+  const playerPlace = standings.findIndex(r=>r.isPlayer)+1;
+  const reward = RACE_PLACE_REWARDS[playerPlace-1] || 0;
+  if(reward>0){
+    state.coins += reward;
+    saveState();
+    updateProgressUI();
+  }
+  if(playerPlace===1){
+    celebrateComplete();
+    playSparkleSound();
+  } else if(reward>0){
+    playSparkleSound();
+  } else {
+    playWrongSound();
+  }
+  setTimeout(()=> openRaceResultsModal(standings, playerPlace, reward), 500);
+}
+
+function openRaceResultsModal(standings, playerPlace, reward){
+  const card = document.getElementById('dog-modal-card');
+  const placeLabels = ['🥇 1. plass','🥈 2. plass','🥉 3. plass','4. plass'];
+  const listHtml = standings.map((r,i)=> `<p class="modal-number">${placeLabels[i]}: ${r.name}${r.isPlayer?' (deg!)':''}</p>`).join('');
+  const banners = ['🏆 DU VANT! 🏆','🥈 SÅ NÆRE! 🥈','🥉 BRA JOBBA! 🥉','🏁 LØPET ER OVER 🏁'];
+  const banner = banners[playerPlace-1] || banners[3];
+  const rewardLine = reward>0
+    ? `<p class="modal-rarity rarity-legendarisk">+${reward} godbiter! 🦴</p>`
+    : `<p class="subtitle">Ingen godbiter denne gangen. Prøv igjen!</p>`;
+  card.innerHTML = `
+    <div class="new-banner">${banner}</div>
+    ${listHtml}
+    ${rewardLine}
+    <button class="big-btn race-btn" id="race-again-btn">Kjør igjen! 🏁</button>
+    <button class="secondary-btn" id="race-exit-btn">Tilbake til start 🏠</button>
+  `;
+  document.getElementById('dog-modal').classList.remove('hidden');
+  document.getElementById('race-again-btn').addEventListener('click', ()=>{
+    document.getElementById('dog-modal').classList.add('hidden');
+    enterRace();
+  });
+  document.getElementById('race-exit-btn').addEventListener('click', ()=>{
+    document.getElementById('dog-modal').classList.add('hidden');
+    showScreen('screen-start');
+  });
+}
+
+function raceTick(ts){
+  if(!raceLastTs) raceLastTs = ts;
+  let dt = (ts-raceLastTs)/1000;
+  raceLastTs = ts;
+  if(dt>0.05) dt = 0.05;
+
+  if(race.countdown>0){
+    race.countdown -= dt;
+    if(race.countdown<=0){
+      document.getElementById('race-status-text').textContent = 'Kjør!! 🏁';
+    } else if(race.countdown>1.6){
+      document.getElementById('race-status-text').textContent = 'Klar... 3';
+    } else if(race.countdown>0.8){
+      document.getElementById('race-status-text').textContent = 'Ferdig... 2';
+    } else {
+      document.getElementById('race-status-text').textContent = 'Gå!! 1';
+    }
+  } else if(!race.finished){
+    const car = getActiveCar();
+    const cap = RACE_MAX_SPEED + (car ? car.speedBonus : 0);
+    const player = race.racers[0];
+    player.speed = Math.max(RACE_MIN_SPEED, player.speed - RACE_DECAY_PER_SEC*dt);
+    player.speed = Math.min(player.speed, cap+60);
+    player.x += player.speed*dt;
+
+    race.racers.slice(1).forEach(r=>{
+      if(r.boostTimer>0){ r.boostTimer -= dt; }
+      const wobble = Math.sin(ts/1000*1.6 + r.phase)*RACE_AI_WOBBLE;
+      const boost = r.boostTimer>0 ? RACE_AI_BOOST_AMOUNT : 0;
+      const gap = player.x - r.x;
+      const catchUp = gap>RACE_AI_CATCHUP_GAP ? Math.min(RACE_AI_CATCHUP_MAX, (gap-RACE_AI_CATCHUP_GAP)*RACE_AI_CATCHUP_FACTOR) : 0;
+      r.speed = Math.max(100, r.baseSpeed + wobble + boost + catchUp);
+      if(r.boostTimer<=0 && Math.random() < RACE_AI_BOOST_CHANCE_PER_SEC*dt){ r.boostTimer = 1 + Math.random(); }
+      r.x += r.speed*dt;
+    });
+
+    if(race.turboFlashTimer>0){ race.turboFlashTimer -= dt; }
+
+    const leader = race.racers.reduce((a,b)=> b.x>a.x?b:a, race.racers[0]);
+    if(leader.x >= RACE_LENGTH && !race.finished){
+      race.finished = true;
+      finishRace();
+    }
+  }
+
+  const player = race.racers[0];
+  const targetCam = Math.max(0, Math.min(RACE_LENGTH-CANVAS_W+240, player.x - CANVAS_W*0.35));
+  race.camX += (targetCam-race.camX)*0.12;
+
+  drawRace();
+
+  if(!race.finished){
+    raceRafId = requestAnimationFrame(raceTick);
+  } else {
+    raceRafId = null;
+  }
+}
+
+function drawCheckerLine(ctx, sx, y, h){
+  if(sx<-20 || sx>CANVAS_W+20) return;
+  const rows = Math.floor(h/16);
+  for(let i=0;i<rows;i++){
+    ctx.fillStyle = i%2===0 ? '#fff' : '#222';
+    ctx.fillRect(sx-6, y+i*16, 12, 16);
+  }
+}
+
+function drawRaceCar(ctx, x, y, color, isPlayer){
+  ctx.save();
+  ctx.translate(x,y);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.2)';
+  ctx.beginPath(); ctx.ellipse(0,20,30,7,0,0,Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = '#2B2B2B';
+  ctx.beginPath(); ctx.arc(-16,16,8,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(16,16,8,0,Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = color;
+  roundRect(ctx,-30,-6,60,22,10); ctx.fill();
+  ctx.fillStyle = shadeColor(color,0.3);
+  roundRect(ctx,-14,-16,28,14,6); ctx.fill();
+
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(-5,-9,4,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#3B2F2F';
+  ctx.beginPath(); ctx.arc(-6,-9,2,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(2,-9,2,0,Math.PI*2); ctx.fill();
+
+  if(isPlayer){
+    ctx.fillStyle = '#FFD54F';
+    ctx.beginPath();
+    ctx.moveTo(0,-28); ctx.lineTo(-5,-18); ctx.lineTo(5,-18);
+    ctx.closePath(); ctx.fill();
+  }
+
+  ctx.restore();
+}
+
+function drawRace(){
+  const ctx = raceCtx;
+  const cam = race.camX;
+  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+
+  const sky = ctx.createLinearGradient(0,0,0,CANVAS_H);
+  sky.addColorStop(0,'#8CE0FF');
+  sky.addColorStop(0.55,'#C9EFFF');
+  sky.addColorStop(1,'#E8F7FF');
+  ctx.fillStyle = sky;
+  ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+
+  ctx.fillStyle = '#FFE082';
+  ctx.beginPath(); ctx.arc(CANVAS_W-90,70,38,0,Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  for(let i=0;i<5;i++){
+    const raw = i*500 - cam*0.3;
+    const sx = ((raw%(CANVAS_W+300))+(CANVAS_W+300))%(CANVAS_W+300) - 150;
+    drawCloud(ctx, sx, 50+(i*29)%60);
+  }
+
+  ctx.fillStyle = 'rgba(120,200,140,0.4)';
+  for(let i=0;i<6;i++){
+    const raw = i*420 - cam*0.5;
+    const sx = ((raw%(CANVAS_W+400))+(CANVAS_W+400))%(CANVAS_W+400) - 200;
+    ctx.beginPath(); ctx.arc(sx, 300, 140, Math.PI, 0); ctx.fill();
+  }
+
+  ctx.fillStyle = '#78788C';
+  ctx.fillRect(0,300,CANVAS_W,210);
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.7)';
+  ctx.lineWidth = 3;
+  ctx.setLineDash([18,16]);
+  [350,400,450].forEach(y=>{
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(CANVAS_W,y); ctx.stroke();
+  });
+  ctx.setLineDash([]);
+
+  drawCheckerLine(ctx, 0-cam, 300, 210);
+  drawCheckerLine(ctx, RACE_LENGTH-cam, 300, 210);
+
+  race.racers.forEach((r,i)=>{
+    const sx = r.x - cam;
+    if(sx<-60 || sx>CANVAS_W+60) return;
+    drawRaceCar(ctx, sx, RACE_LANE_Y[i], r.color, r.isPlayer);
+  });
+
+  if(race.countdown>0){
+    ctx.fillStyle = 'rgba(0,0,0,0.35)';
+    ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+    ctx.fillStyle = '#fff';
+    ctx.font = 'bold 64px "Comic Sans MS", sans-serif';
+    ctx.textAlign = 'center';
+    const label = race.countdown>1.6 ? '3' : race.countdown>0.8 ? '2' : '1';
+    ctx.fillText(label, CANVAS_W/2, CANVAS_H/2+20);
+  }
+
+  if(race.turboFlashTimer>0){
+    ctx.fillStyle = `rgba(255,213,79,${Math.max(0,race.turboFlashTimer)*0.5})`;
+    ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+  }
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  roundRect(ctx, 14, 14, 150, 34, 14); ctx.fill();
+  ctx.fillStyle = '#5C3A52';
+  ctx.font = 'bold 15px "Comic Sans MS", sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText(`🔥 Turbo: ${race.turboLeft}`, 26, 36);
+}
+
+function renderHatShop(){
+  const list = document.getElementById('shop-list');
+  list.innerHTML = '';
+  HATS.forEach(h=>{
+    const owned = state.hatsOwned.includes(h.id);
+    const equipped = state.equippedHat===h.id;
+    const row = document.createElement('div');
+    row.className = 'shop-item';
+    row.innerHTML = `<span class="shop-item-icon">${h.emoji}</span><span class="shop-item-info"><span class="shop-item-name">${h.name}</span><span class="shop-item-price">${owned ? (equipped ? 'På karakteren nå' : 'Eid') : h.price+' 🦴'}</span></span>`;
+    const btn = document.createElement('button');
+    btn.className = 'shop-buy-btn' + (equipped ? ' equipped' : '');
+    if(!owned){
+      btn.textContent = 'Kjøp';
+      btn.disabled = state.coins < h.price;
+      btn.addEventListener('click', ()=> buyHat(h.id));
+    } else {
+      btn.textContent = equipped ? 'Ta av' : 'Ta på';
+      btn.addEventListener('click', ()=> toggleEquipHat(h.id));
+    }
+    row.appendChild(btn);
+    list.appendChild(row);
+  });
+}
+
+function buyHat(id){
+  const hat = HATS.find(h=>h.id===id);
+  if(!hat || state.coins<hat.price || state.hatsOwned.includes(id)) return;
+  state.coins -= hat.price;
+  state.hatsOwned.push(id);
+  saveState();
+  playSparkleSound();
+  updateProgressUI();
+  renderShop();
+}
+
+function toggleEquipHat(id){
+  state.equippedHat = state.equippedHat===id ? null : id;
+  saveState();
+  updateProgressUI();
+  renderShop();
+}
+
+function pickCardRarity(){
+  const roll = Math.random()*100;
+  let cum = 0;
+  for(const r of CARD_RARITIES){
+    cum += r.weight;
+    if(roll<=cum) return r;
+  }
+  return CARD_RARITIES[0];
+}
+
+function openCardPack(){
+  if(state.coins < PACK_PRICE || state.dogsCollected<=0) return;
+  state.coins -= PACK_PRICE;
+  const dogIndex = Math.floor(Math.random()*state.dogsCollected);
+  const rarity = pickCardRarity();
+  if(!state.cards[dogIndex]) state.cards[dogIndex] = {count:0, bestRarity:'vanlig'};
+  state.cards[dogIndex].count++;
+  const order = CARD_RARITIES.map(r=>r.id);
+  if(order.indexOf(rarity.id) > order.indexOf(state.cards[dogIndex].bestRarity)){
+    state.cards[dogIndex].bestRarity = rarity.id;
+  }
+  saveState();
+  updateProgressUI();
+  renderShop();
+  showCardRevealModal(dogIndex, rarity);
+}
+
+function showCardRevealModal(dogIndex, rarity){
+  const data = getDogData(dogIndex);
+  const card = document.getElementById('dog-modal-card');
+  card.innerHTML = `
+    <div class="new-banner">🃏 NYTT KORT! 🃏</div>
+    <div class="modal-dog-svg">${buildDogSVG(data)}</div>
+    <h2>${data.name}</h2>
+    <p class="modal-number">Hund #${data.number}</p>
+    <p class="modal-rarity rarity-${rarity.id==='legendarisk'?'legendarisk':rarity.id==='episk'?'super':rarity.id==='sjelden'?'sjelden':'vanlig'}">Kort: ${rarity.label}</p>
+    <button class="big-btn" id="modal-continue-btn">Kult! 🎉</button>
+  `;
+  document.getElementById('dog-modal').classList.remove('hidden');
+  document.getElementById('modal-continue-btn').addEventListener('click', ()=>{
+    document.getElementById('dog-modal').classList.add('hidden');
+  });
+  playSparkleSound();
+  if(rarity.id==='episk' || rarity.id==='legendarisk'){
+    burstConfetti(window.innerWidth/2, window.innerHeight*0.35, 70);
+  }
+}
+
+function renderCardShop(){
+  const list = document.getElementById('shop-list');
+  list.innerHTML = '';
+  const packBtn = document.createElement('button');
+  packBtn.id = 'open-pack-btn';
+  packBtn.className = 'big-btn shop-btn-launch';
+  packBtn.textContent = `Åpne kortpakke (${PACK_PRICE} 🦴)`;
+  packBtn.disabled = state.coins<PACK_PRICE;
+  packBtn.addEventListener('click', openCardPack);
+  list.appendChild(packBtn);
+
+  const gallery = document.createElement('div');
+  gallery.className = 'card-gallery';
+  const keys = Object.keys(state.cards).map(Number).sort((a,b)=>a-b);
+  if(keys.length===0){
+    const p = document.createElement('p');
+    p.className = 'subtitle';
+    p.style.marginTop = '16px';
+    p.textContent = 'Ingen kort ennå – åpne en pakke!';
+    list.appendChild(p);
+  } else {
+    keys.forEach(idx=>{
+      const info = state.cards[idx];
+      const data = getDogData(idx);
+      const rarity = CARD_RARITIES.find(r=>r.id===info.bestRarity) || CARD_RARITIES[0];
+      const el = document.createElement('div');
+      el.className = 'card-item';
+      el.style.setProperty('--card-color', rarity.color);
+      el.innerHTML = `${buildDogSVG(data)}<span class="card-item-name">${data.name}</span><span class="card-item-count">x${info.count}</span>`;
+      gallery.appendChild(el);
+    });
+    list.appendChild(gallery);
+  }
+}
+
+function worldTick(ts){
+  if(!worldLastTs) worldLastTs = ts;
+  let dt = (ts-worldLastTs)/1000;
+  worldLastTs = ts;
+  if(dt>0.05) dt = 0.05;
+
+  const dog = world.dog;
+  const course = world.course;
+
+  world.movingPlatforms.forEach(p=>{
+    p.prevX = p.x;
+    if(p.vertical){
+      p.y = p.baseY + Math.sin((ts/1000)*p.speed)*p.rangeY;
+    } else {
+      p.x = p.baseX + Math.sin((ts/1000)*p.speed)*p.rangeX;
+    }
+  });
+
+  dog.vx = 0;
+  if(worldKeys.left){ dog.vx = -MOVE_SPEED; dog.facing = -1; }
+  if(worldKeys.right){ dog.vx = MOVE_SPEED; dog.facing = 1; }
+
+  if(dog.onGround && dog.standingOn && dog.standingOn.baseX!==undefined){
+    dog.x += (dog.standingOn.x - dog.standingOn.prevX);
+  }
+
+  dog.x += dog.vx*dt;
+  dog.x = Math.max(20, Math.min(course.width-20, dog.x));
+
+  const wasOnGround = dog.onGround;
+  dog.vy += GRAVITY*dt;
+  const prevY = dog.y;
+  dog.y += dog.vy*dt;
+  dog.onGround = false;
+  dog.standingOn = null;
+
+  if(!isOverGap(course, dog.x) && dog.y >= GROUND_Y){
+    dog.y = GROUND_Y;
+    dog.vy = 0;
+    dog.onGround = true;
+  } else {
+    const allPlatforms = course.platforms.concat(world.movingPlatforms);
+    for(const p of allPlatforms){
+      const withinX = dog.x > p.x-6 && dog.x < p.x+p.w+6;
+      if(withinX && dog.vy>=0 && prevY<=p.y && dog.y>=p.y){
+        dog.y = p.y;
+        dog.vy = 0;
+        dog.onGround = true;
+        dog.standingOn = p;
+        break;
+      }
+    }
+  }
+  if(!wasOnGround && dog.onGround){ dog.squash = 1; }
+  if(dog.squash>0){ dog.squash = Math.max(0, dog.squash - dt*4); }
+
+  if(dog.vx!==0 && dog.onGround){ dog.walkPhase += dt*10; }
+
+  if(dog.y > GROUND_Y+140){ respawnDog(); }
+
+  world.checkpoints.forEach(cp=>{
+    if(!cp.touched && dog.onGround && Math.abs(dog.x-cp.x)<24){
+      cp.touched = true;
+      world.respawnX = cp.x;
+      world.respawnY = GROUND_Y;
+      showWorldMessage('🚩 Sjekkpunkt!');
+      playSparkleSound();
+    }
+  });
+
+  if(!world.finished && dog.x >= course.goalX-20){
+    world.finished = true;
+    onCourseFinished();
+  }
+
+  const targetCamX = Math.max(0, Math.min(course.width-CANVAS_W, dog.x-CANVAS_W/2));
+  world.camX += (targetCamX-world.camX)*0.15;
+
+  world.clouds.forEach(c=>{
+    c.x += c.speed*dt;
+    if(c.x > course.width+100) c.x = -100;
+  });
+
+  if(world.messageTimer>0){ world.messageTimer -= dt; }
+
+  checkTreatCollisions();
+  drawWorld();
+
+  if(!world.finished){
+    worldRafId = requestAnimationFrame(worldTick);
+  } else {
+    worldRafId = null;
+  }
+}
+
+function drawCloud(ctx,x,y){
+  ctx.beginPath();
+  ctx.arc(x,y,18,0,Math.PI*2);
+  ctx.arc(x+18,y-8,16,0,Math.PI*2);
+  ctx.arc(x+36,y,18,0,Math.PI*2);
+  ctx.arc(x+18,y+6,20,0,Math.PI*2);
+  ctx.fill();
+}
+
+function drawTree(ctx,x,groundY,scale,theme){
+  ctx.save();
+  ctx.translate(x,groundY);
+  ctx.scale(scale,scale);
+  ctx.fillStyle = '#B98A5E';
+  ctx.fillRect(-6,-40,12,42);
+  ctx.fillStyle = theme.foliage;
+  ctx.beginPath(); ctx.arc(0,-55,28,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = theme.foliageLight;
+  ctx.beginPath(); ctx.arc(-14,-45,18,0,Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(14,-45,18,0,Math.PI*2); ctx.fill();
+  ctx.restore();
+}
+
+function drawFlag(ctx,x,groundY,color){
+  ctx.strokeStyle = '#8A5FBF'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(x,groundY); ctx.lineTo(x,groundY-70); ctx.stroke();
+  ctx.fillStyle = color;
+  ctx.beginPath(); ctx.moveTo(x,groundY-70); ctx.lineTo(x+26,groundY-58); ctx.lineTo(x,groundY-46); ctx.closePath(); ctx.fill();
+}
+
+function drawStartSign(ctx,x,groundY){
+  ctx.strokeStyle = '#2E9E6B'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.moveTo(x,groundY-32); ctx.lineTo(x,groundY); ctx.stroke();
+  ctx.fillStyle = '#4FD1A5';
+  roundRect(ctx,x-28,groundY-58,56,26,8); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 13px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText('START',x,groundY-40);
+}
+
+function drawGoalFlag(ctx,x,groundY){
+  ctx.strokeStyle = '#8A5FBF'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(x,groundY); ctx.lineTo(x,groundY-110); ctx.stroke();
+  ctx.fillStyle = '#FFD54F';
+  ctx.beginPath(); ctx.arc(x,groundY-114,8,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#FF6FA5';
+  ctx.beginPath(); ctx.moveTo(x,groundY-104); ctx.lineTo(x+42,groundY-90); ctx.lineTo(x,groundY-76); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center';
+  ctx.save(); ctx.translate(x+17,groundY-90); ctx.fillText('MÅL',0,4); ctx.restore();
+}
+
+function drawTreat(ctx,x,y){
+  const t = performance.now()/500;
+  const bob = Math.sin(t+x*0.05)*4;
+  ctx.save();
+  ctx.translate(x, y+bob);
+  ctx.rotate(Math.sin(t*0.7+x)*0.15);
+  ctx.fillStyle = '#FFF4DC';
+  ctx.strokeStyle = '#E0B676';
+  ctx.lineWidth = 2;
+  roundRect(ctx,-14,-6,28,12,6);
+  ctx.fill(); ctx.stroke();
+  [[-14,-6],[-14,6],[14,-6],[14,6]].forEach(([cx,cy])=>{
+    ctx.beginPath(); ctx.arc(cx,cy,6,0,Math.PI*2); ctx.fill(); ctx.stroke();
+  });
+  ctx.restore();
+}
+
+function drawWorldDog(ctx, d, x, y, facing, walkPhase, squash, onGround){
+  const earShade = shadeColor(d.fur,-0.18);
+  const muzzleShade = shadeColor(d.fur,0.5);
+
+  ctx.save();
+  ctx.translate(x,y);
+  ctx.scale(facing,1);
+
+  ctx.fillStyle = 'rgba(0,0,0,0.15)';
+  ctx.beginPath(); ctx.ellipse(0,6,22,6,0,0,Math.PI*2); ctx.fill();
+
+  const legSwing = onGround ? Math.sin(walkPhase)*10 : 0;
+  const squashY = 1 - squash*0.18;
+  const squashX = 1 + squash*0.12;
+  ctx.scale(squashX, squashY);
+
+  ctx.strokeStyle = earShade; ctx.lineWidth=8; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(-8,-16); ctx.lineTo(-8+legSwing*0.5,0); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(8,-16); ctx.lineTo(8-legSwing*0.5,0); ctx.stroke();
+
+  if(d.feet){
+    const feetItem = CLOTHES.find(c=>c.id===d.feet);
+    if(feetItem){
+      ctx.fillStyle = feetItem.color;
+      ctx.beginPath(); ctx.ellipse(-8+legSwing*0.5,1,6,4,0,0,Math.PI*2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(8-legSwing*0.5,1,6,4,0,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  const tailWag = Math.sin(performance.now()/180)*0.4;
+  ctx.strokeStyle = d.fur; ctx.lineWidth=7; ctx.lineCap='round';
+  ctx.beginPath();
+  ctx.moveTo(-16,-30);
+  ctx.quadraticCurveTo(-30,-40+tailWag*10,-26,-52+tailWag*6);
+  ctx.stroke();
+
+  ctx.fillStyle = d.fur;
+  ctx.beginPath(); ctx.ellipse(0,-24,22,16,0,0,Math.PI*2); ctx.fill();
+
+  if(d.torso){
+    const torsoItem = CLOTHES.find(c=>c.id===d.torso);
+    if(torsoItem){
+      ctx.fillStyle = torsoItem.color;
+      ctx.beginPath(); ctx.ellipse(0,-22,19,13,0,0,Math.PI*2); ctx.fill();
+    }
+  }
+
+  ctx.save();
+  ctx.translate(16,-40);
+
+  ctx.fillStyle = earShade;
+  if(d.earShape==='floppy'){
+    ctx.beginPath(); ctx.ellipse(-8,-4,6,11,-0.3,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(9,-4,6,11,0.3,0,Math.PI*2); ctx.fill();
+  } else {
+    ctx.beginPath(); ctx.moveTo(-12,-2); ctx.lineTo(-8,-20); ctx.lineTo(-2,-4); ctx.closePath(); ctx.fill();
+    ctx.beginPath(); ctx.moveTo(12,-2); ctx.lineTo(8,-20); ctx.lineTo(2,-4); ctx.closePath(); ctx.fill();
+  }
+
+  ctx.fillStyle = d.fur;
+  ctx.beginPath(); ctx.arc(0,0,16,0,Math.PI*2); ctx.fill();
+
+  if(d.accessory && d.accessory.indexOf('hat-')===0){
+    const hatId = d.accessory.slice(4);
+    if(hatId==='tophat'){
+      ctx.fillStyle = '#2B2B2B';
+      ctx.fillRect(-8,-30,16,10);
+      ctx.fillRect(-11,-21,22,3);
+      ctx.fillStyle = '#FF6FA5';
+      ctx.fillRect(-8,-24,16,2);
+    } else if(hatId==='cap'){
+      ctx.fillStyle = '#5CA8FF';
+      ctx.beginPath(); ctx.arc(0,-18,11,Math.PI,0); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(11,-16,6,3,0,0,Math.PI*2); ctx.fill();
+    } else if(hatId==='party'){
+      ctx.fillStyle = '#FF6FA5';
+      ctx.beginPath(); ctx.moveTo(0,-34); ctx.lineTo(8,-16); ctx.lineTo(-8,-16); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#FFD54F';
+      ctx.beginPath(); ctx.arc(0,-34,2.5,0,Math.PI*2); ctx.fill();
+    } else if(hatId==='winter'){
+      ctx.fillStyle = '#7EE8C7';
+      ctx.beginPath(); ctx.arc(0,-18,11,Math.PI,0); ctx.fill();
+      ctx.fillStyle = '#4FD1A5'; ctx.fillRect(-11,-19,22,4);
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(0,-30,3.5,0,Math.PI*2); ctx.fill();
+    } else if(hatId==='sunhat'){
+      ctx.fillStyle = '#FFD54F';
+      ctx.beginPath(); ctx.ellipse(0,-16,18,4,0,0,Math.PI*2); ctx.fill();
+      ctx.fillStyle = '#FFE082';
+      ctx.beginPath(); ctx.ellipse(0,-22,9,7,0,0,Math.PI*2); ctx.fill();
+    } else if(hatId==='goldcrown'){
+      ctx.fillStyle = '#FFD700'; ctx.strokeStyle = '#E0A800'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-9,-16); ctx.lineTo(-6,-26); ctx.lineTo(-2,-19); ctx.lineTo(0,-28); ctx.lineTo(2,-19); ctx.lineTo(6,-26); ctx.lineTo(9,-16);
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if(hatId==='viking'){
+      ctx.fillStyle = '#B0B0C0';
+      ctx.beginPath(); ctx.arc(0,-18,11,Math.PI,0); ctx.fill();
+      ctx.strokeStyle = '#F0E6D2'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-9,-24); ctx.quadraticCurveTo(-16,-34,-11,-30); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(9,-24); ctx.quadraticCurveTo(16,-34,11,-30); ctx.stroke();
+    } else if(hatId==='flowercrown'){
+      const petals = [[-9,-20],[-4,-27],[4,-27],[9,-20],[0,-24]];
+      const petalColors = ['#FF9EC7','#C9A0FF','#7EC8FF','#7EE8C7','#FFD54F'];
+      petals.forEach((p,i)=>{
+        ctx.fillStyle = petalColors[i%petalColors.length];
+        ctx.beginPath(); ctx.arc(p[0],p[1],2.6,0,Math.PI*2); ctx.fill();
+      });
+    } else if(hatId==='pirate'){
+      ctx.fillStyle = '#2B2B2B';
+      ctx.beginPath();
+      ctx.moveTo(-11,-16); ctx.quadraticCurveTo(-6,-30,0,-22); ctx.quadraticCurveTo(6,-30,11,-16);
+      ctx.quadraticCurveTo(0,-20,-11,-16); ctx.closePath(); ctx.fill();
+      ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(0,-22,1.4,0,Math.PI*2); ctx.fill();
+    } else if(hatId==='rainbowhat'){
+      const bands = ['#FF6FA5','#FFD54F','#7EE8C7','#7EC8FF'];
+      bands.forEach((c,i)=>{ ctx.fillStyle=c; ctx.fillRect(-8,-30+i*2.5,16,2.5); });
+      ctx.fillStyle = '#C9A0FF';
+      ctx.fillRect(-11,-21,22,3);
+    }
+  }
+
+  ctx.fillStyle = muzzleShade;
+  ctx.beginPath(); ctx.ellipse(9,4,8,6,0,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#3B2F2F';
+  ctx.beginPath(); ctx.ellipse(13,3,2.4,1.8,0,0,Math.PI*2); ctx.fill();
+
+  ctx.fillStyle = '#3B2F2F';
+  ctx.beginPath(); ctx.arc(3,-4,2.2,0,Math.PI*2); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.arc(3.8,-4.8,0.8,0,Math.PI*2); ctx.fill();
+
+  ctx.restore();
+  ctx.restore();
+}
+
+function drawWorld(){
+  const ctx = worldCtx;
+  const course = world.course;
+  const theme = THEMES[course.theme];
+  const cam = world.camX;
+  ctx.clearRect(0,0,CANVAS_W,CANVAS_H);
+
+  const sky = ctx.createLinearGradient(0,0,0,CANVAS_H);
+  sky.addColorStop(0,theme.skyTop);
+  sky.addColorStop(0.6,theme.skyMid);
+  sky.addColorStop(1,theme.skyBottom);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0,0,CANVAS_W,CANVAS_H);
+
+  if(theme.night){
+    ctx.fillStyle = 'rgba(255,255,255,0.8)';
+    for(let i=0;i<25;i++){
+      const sx=(i*137)%CANVAS_W, sy=(i*79)%260;
+      ctx.beginPath(); ctx.arc(sx,sy,1.4,0,Math.PI*2); ctx.fill();
+    }
+    ctx.fillStyle = '#F5F0E6';
+    ctx.beginPath(); ctx.arc(CANVAS_W-90,80,36,0,Math.PI*2); ctx.fill();
+  } else {
+    ctx.fillStyle = '#FFE082';
+    ctx.beginPath(); ctx.arc(CANVAS_W-90,80,42,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = 'rgba(255,224,130,0.5)';
+    ctx.beginPath(); ctx.arc(CANVAS_W-90,80,58,0,Math.PI*2); ctx.fill();
+  }
+
+  if(course.finale){
+    const t = performance.now()/1000;
+    const finaleColors = ['#FF6FA5','#FFD54F','#C9A0FF','#7EE8C7','#7EC8FF'];
+    for(let i=0;i<16;i++){
+      const sx = (i*211 - cam*0.4) % (CANVAS_W+200) - 100;
+      const sy = 20 + (i*97)%320;
+      const twinkle = 0.4 + Math.sin(t*2 + i)*0.4;
+      ctx.fillStyle = finaleColors[i%finaleColors.length];
+      ctx.globalAlpha = Math.max(0.15, twinkle);
+      ctx.font = `${8+(i%3)*4}px sans-serif`;
+      ctx.fillText('✦', ((sx%(CANVAS_W+200))+CANVAS_W+200)%(CANVAS_W+200)-100, sy);
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  world.clouds.forEach(c=>{
+    const sx = c.x - cam*0.3;
+    if(sx<-80 || sx>CANVAS_W+80) return;
+    drawCloud(ctx, sx, c.y);
+  });
+
+  world.hills.forEach(h=>{
+    const sx = h.x - cam*0.5;
+    if(sx<-h.r*1.5 || sx>CANVAS_W+h.r*1.5) return;
+    ctx.fillStyle = theme.hill;
+    ctx.beginPath(); ctx.arc(sx, GROUND_Y+20, h.r, Math.PI, 0); ctx.fill();
+  });
+
+  groundSegments(course).forEach(seg=>{
+    const sx1 = seg.x1-cam, sx2 = seg.x2-cam;
+    if(sx2<0 || sx1>CANVAS_W) return;
+    const gg = ctx.createLinearGradient(0,GROUND_Y,0,CANVAS_H);
+    gg.addColorStop(0,theme.groundTop); gg.addColorStop(1,theme.groundBottom);
+    ctx.fillStyle = gg;
+    ctx.fillRect(sx1,GROUND_Y,sx2-sx1,CANVAS_H-GROUND_Y);
+    ctx.strokeStyle = theme.groundLine; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(sx1,GROUND_Y); ctx.lineTo(sx2,GROUND_Y); ctx.stroke();
+    ctx.strokeStyle = 'rgba(255,255,255,0.7)'; ctx.lineWidth = 2; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(sx1,GROUND_Y); ctx.lineTo(sx1,GROUND_Y+40); ctx.moveTo(sx2,GROUND_Y); ctx.lineTo(sx2,GROUND_Y+40); ctx.stroke();
+    ctx.setLineDash([]);
+  });
+
+  world.trees.forEach(t=>{
+    const sx = t.x-cam;
+    if(sx<-60 || sx>CANVAS_W+60) return;
+    drawTree(ctx, sx, GROUND_Y, t.scale, theme);
+  });
+
+  ctx.strokeStyle = theme.groundLine; ctx.lineWidth = 2;
+  for(let wx=20; wx<course.width; wx+=70){
+    if(isOverGap(course,wx)) continue;
+    const sx = wx-cam;
+    if(sx<-10 || sx>CANVAS_W+10) continue;
+    ctx.beginPath();
+    ctx.moveTo(sx,GROUND_Y+6); ctx.lineTo(sx-4,GROUND_Y-4);
+    ctx.moveTo(sx+5,GROUND_Y+6); ctx.lineTo(sx+5,GROUND_Y-6);
+    ctx.moveTo(sx+10,GROUND_Y+6); ctx.lineTo(sx+13,GROUND_Y-3);
+    ctx.stroke();
+  }
+
+  const allPlatforms = course.platforms.concat(world.movingPlatforms);
+  allPlatforms.forEach(p=>{
+    const sx = p.x-cam;
+    if(sx+p.w<-10 || sx>CANVAS_W+10) return;
+    ctx.fillStyle = '#FFD6E8';
+    roundRect(ctx, sx, p.y, p.w, p.h, 10);
+    ctx.fill();
+    ctx.fillStyle = '#A8EFC5';
+    roundRect(ctx, sx, p.y, p.w, 8, 6);
+    ctx.fill();
+  });
+
+  world.checkpoints.forEach(cp=>{
+    const sx = cp.x-cam;
+    if(sx<-20 || sx>CANVAS_W+20) return;
+    drawFlag(ctx, sx, GROUND_Y, cp.touched ? '#7EE8C7' : '#FFD54F');
+  });
+
+  const startSx = course.startX-cam;
+  if(startSx>-40 && startSx<CANVAS_W+40){ drawStartSign(ctx, startSx, GROUND_Y); }
+
+  const goalSx = course.goalX-cam;
+  if(goalSx>-40 && goalSx<CANVAS_W+40){ drawGoalFlag(ctx, goalSx, GROUND_Y); }
+
+  world.treats.forEach(t=>{
+    if(t.collected) return;
+    const sx = t.x-cam;
+    if(sx<-30 || sx>CANVAS_W+30) return;
+    drawTreat(ctx, sx, t.y);
+  });
+
+  drawWorldDog(ctx, world.dogData, world.dog.x-cam, world.dog.y, world.dog.facing, world.dog.walkPhase, world.dog.squash, world.dog.onGround);
+
+  if(world.messageTimer>0){
+    ctx.save();
+    ctx.globalAlpha = Math.min(1, world.messageTimer);
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    roundRect(ctx, CANVAS_W/2-140, 20, 280, 40, 16); ctx.fill();
+    ctx.fillStyle = '#FF6FA5'; ctx.font = 'bold 18px "Comic Sans MS", sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(world.message, CANVAS_W/2, 46);
+    ctx.restore();
+  }
+}
+
+function wireButtons(){
+  document.getElementById('start-btn').addEventListener('click', ()=>{ newProblem(); showScreen('screen-game'); });
+  document.getElementById('start-english-btn').addEventListener('click', ()=>{ newEnglishProblem(); showScreen('screen-english'); });
+  document.getElementById('album-btn-start').addEventListener('click', ()=> openAlbum('dogs'));
+  document.getElementById('album-btn-game').addEventListener('click', ()=> openAlbum('dogs'));
+  document.getElementById('album-btn-english').addEventListener('click', ()=> openAlbum('animals'));
+  document.getElementById('complete-album-btn').addEventListener('click', ()=> openAlbum('dogs'));
+  document.getElementById('complete-keep-btn').addEventListener('click', ()=>{ newProblem(); showScreen('screen-game'); });
+  document.getElementById('complete-start-english-btn').addEventListener('click', ()=>{ newEnglishProblem(); showScreen('screen-english'); });
+  document.getElementById('english-complete-album-btn').addEventListener('click', ()=> openAlbum('animals'));
+  document.getElementById('english-complete-home-btn').addEventListener('click', ()=> showScreen('screen-start'));
+  document.getElementById('change-character-btn').addEventListener('click', ()=> openAlbum('dogs'));
+  document.getElementById('park-btn').addEventListener('click', ()=>{ renderCourseList(); showScreen('screen-park-select'); });
+  document.getElementById('open-shop-btn').addEventListener('click', ()=> openShop());
+  document.getElementById('home-btn-shop').addEventListener('click', ()=> showScreen('screen-start'));
+  document.getElementById('shop-tab-hats').addEventListener('click', ()=>{ shopTab='hats'; renderShop(); });
+  document.getElementById('shop-tab-cards').addEventListener('click', ()=>{ shopTab='cards'; renderShop(); });
+  document.getElementById('shop-tab-vehicles').addEventListener('click', ()=>{ shopTab='vehicles'; renderShop(); });
+  document.getElementById('shop-tab-clothes').addEventListener('click', ()=>{ shopTab='clothes'; renderShop(); });
+  document.getElementById('race-btn').addEventListener('click', enterRace);
+  document.getElementById('math-level-line').addEventListener('click', openMathStatsModal);
+  document.getElementById('stats-btn').addEventListener('click', openMathStatsModal);
+  document.getElementById('home-btn-race').addEventListener('click', exitRace);
+  document.getElementById('candy-btn').addEventListener('click', enterCandyGame);
+  document.getElementById('forbidden-btn').addEventListener('click', pressForbiddenButton);
+  document.getElementById('home-btn-candy').addEventListener('click', exitCandyGame);
+  document.getElementById('candy-reset-btn').addEventListener('click', enterCandyGame);
+  document.getElementById('candy-grid').addEventListener('click', (e)=>{
+    const btn = e.target.closest('.candy-cell');
+    if(!btn) return;
+    handleCandyCellClick(parseInt(btn.dataset.index,10));
+  });
+  document.getElementById('home-btn-park-select').addEventListener('click', ()=>{
+    if(worldRafId){ cancelAnimationFrame(worldRafId); worldRafId = null; }
+    showScreen('screen-start');
+  });
+  document.getElementById('home-btn-world').addEventListener('click', exitWorldToSelect);
+  document.getElementById('world-reset-btn').addEventListener('click', ()=>{
+    if(!world) return;
+    enterWorld(world.courseIndex);
+  });
+
+  document.getElementById('home-btn-game').addEventListener('click', ()=> showScreen('screen-start'));
+  document.getElementById('home-btn-album').addEventListener('click', ()=> showScreen('screen-start'));
+  document.getElementById('home-btn-english').addEventListener('click', ()=> showScreen('screen-start'));
+
+  document.getElementById('tab-dogs').addEventListener('click', ()=> switchAlbumTab('dogs'));
+  document.getElementById('tab-animals').addEventListener('click', ()=> switchAlbumTab('animals'));
+
+  document.getElementById('english-check-btn').addEventListener('click', submitEnglishAnswer);
+  document.getElementById('english-input').addEventListener('keydown', (e)=>{
+    if(e.key==='Enter') submitEnglishAnswer();
+  });
+
+  document.querySelectorAll('.mute-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      state.muted = !state.muted;
+      saveState();
+      updateMuteIcon();
+    });
+  });
+
+  document.querySelectorAll('.settings-toggle').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.getElementById('settings-modal').classList.remove('hidden');
+    });
+  });
+  document.getElementById('close-settings-btn').addEventListener('click', ()=>{
+    document.getElementById('settings-modal').classList.add('hidden');
+  });
+  document.getElementById('reset-btn').addEventListener('click', ()=>{
+    const sure = confirm('Er du sikker på at du vil slette alle hunder, dyr, godbiter, hatter, klær, kort og biler og starte på nytt? Dette kan ikke angres.');
+    if(sure){
+      state = {dogsCollected:0, totalCorrect:0, muted:state.muted, animalsCollected:0, character:null, characterType:'dog', parkCompleted:0, parkBestTreats:makeEmptyParkBestTreats(), coins:0, hatsOwned:[], equippedHat:null, cards:{}, carsOwned:[], selectedCar:null, clothesOwned:[], equippedTorso:null, equippedFeet:null, correctByOp:{'+':0,'-':0,'×':0}, mollyUnlocked:false};
+      saveState();
+      updateProgressUI();
+      document.getElementById('settings-modal').classList.add('hidden');
+      showScreen('screen-start');
+    }
+  });
+
+  hintBtn.addEventListener('click', ()=>{
+    feedbackEl.textContent = `Svaret er ${currentProblem.answer}! Godt jobbet med å prøve 💛`;
+    feedbackEl.className = 'feedback-msg positive';
+    hintBtn.classList.add('hidden');
+    wrongAttempts = 0;
+    setTimeout(()=> newProblem(), 2200);
+  });
+
+  hintBtnEnglish.addEventListener('click', ()=>{
+    feedbackElEnglish.textContent = `Svaret er "${currentEnglishProblem.answers[0]}"! Godt jobbet med å prøve 💛`;
+    feedbackElEnglish.className = 'feedback-msg positive';
+    hintBtnEnglish.classList.add('hidden');
+    wrongAttemptsEnglish = 0;
+    setTimeout(()=> newEnglishProblem(), 2500);
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if(!document.getElementById('screen-game').classList.contains('active')) return;
+    if(/^[0-9]$/.test(e.key)){ if(currentInput.length<3){ currentInput += e.key; updateAnswerDisplay(); } }
+    else if(e.key==='Backspace'){ currentInput = currentInput.slice(0,-1); updateAnswerDisplay(); }
+    else if(e.key==='Enter'){ submitAnswer(); }
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if(!document.getElementById('screen-world').classList.contains('active')) return;
+    if(e.key==='ArrowLeft'){ worldKeys.left = true; e.preventDefault(); }
+    else if(e.key==='ArrowRight'){ worldKeys.right = true; e.preventDefault(); }
+    else if(e.key===' ' || e.key==='Spacebar' || e.key==='ArrowUp'){
+      e.preventDefault();
+      if(world && world.dog.onGround){
+        world.dog.vy = -JUMP_FORCE;
+        world.dog.onGround = false;
+        playJumpSound();
+      }
+    }
+  });
+  document.addEventListener('keyup', (e)=>{
+    if(!document.getElementById('screen-world').classList.contains('active')) return;
+    if(e.key==='ArrowLeft'){ worldKeys.left = false; }
+    else if(e.key==='ArrowRight'){ worldKeys.right = false; }
+  });
+
+  document.addEventListener('keydown', (e)=>{
+    if(!document.getElementById('screen-race').classList.contains('active')) return;
+    if(e.key==='ArrowRight' || e.key===' ' || e.key==='Spacebar'){ e.preventDefault(); }
+    if(!race || race.countdown>0 || race.finished) return;
+    const car = getActiveCar();
+    const player = race.racers[0];
+    if(e.key==='ArrowRight'){
+      if(!e.repeat){
+        const cap = RACE_MAX_SPEED + (car ? car.speedBonus : 0);
+        player.speed = Math.min(cap, player.speed + RACE_TAP_KICK);
+      }
+    } else if(e.key===' ' || e.key==='Spacebar'){
+      if(race.turboLeft>0){
+        const cap = RACE_MAX_SPEED + (car ? car.speedBonus : 0) + 60;
+        player.speed = Math.min(cap, player.speed + RACE_TURBO_ADD);
+        race.turboLeft--;
+        race.turboFlashTimer = 0.4;
+        playTone(600,0.15,'square',0,0.1);
+        playTone(900,0.15,'square',0.08,0.1);
+      }
+    }
+  });
+}
+
+window.addEventListener('DOMContentLoaded', ()=>{
+  state = loadState();
+  feedbackEl = document.getElementById('feedback-msg');
+  hintBtn = document.getElementById('hint-btn');
+  feedbackElEnglish = document.getElementById('feedback-msg-english');
+  hintBtnEnglish = document.getElementById('hint-btn-english');
+  initSparkles();
+  initNumpad();
+  updateMuteIcon();
+  updateProgressUI();
+  wireButtons();
+  showScreen('screen-start');
+});
+</script>
+</body>
+</html>
